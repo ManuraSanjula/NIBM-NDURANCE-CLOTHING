@@ -44,6 +44,17 @@
     </LinearLayout>
 
     <TextView
+        android:id="@+id/error_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Error connecting to the server. Please try again later."
+        android:textColor="#FF0000"
+        android:visibility="visible"
+        android:gravity="center"
+        android:padding="8dp"
+        android:layout_marginTop="16dp" />
+
+    <TextView
         android:id="@+id/tvEmptyCartMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -66,10 +77,12 @@
 
     <!-- Order Summary -->
     <LinearLayout
+        android:id="@+id/orderSummaryLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp"
+        android:visibility="visible"
         android:background="@drawable/bg_card">
 
         <TextView

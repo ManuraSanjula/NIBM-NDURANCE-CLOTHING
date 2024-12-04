@@ -108,6 +108,17 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/error_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Error connecting to the server. Please try again later."
+                android:textColor="#FF0000"
+                android:visibility="gone"
+                android:padding="8dp"
+                android:gravity="center"
+                android:layout_marginTop="16dp" />
+
             <!-- Product List -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/product_recycler_view"

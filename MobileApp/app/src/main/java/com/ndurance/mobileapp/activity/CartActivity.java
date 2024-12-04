@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -39,6 +40,8 @@ public class CartActivity extends AppCompatActivity {
     private CartAdapter cartAdapter;
     private List<CartItem> cartItems = new ArrayList<>();
     private ImageView ivUser, order_icon;
+    private TextView errorMessage;
+    private LinearLayout orderSummaryLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,10 +51,14 @@ public class CartActivity extends AppCompatActivity {
         String userId = tokenManager.getUserId();
         String jwtToken = tokenManager.getJwtToken();
 
+        errorMessage = findViewById(R.id.error_message);
+        errorMessage.setVisibility(View.GONE);
+
         recyclerView = findViewById(R.id.recyclerViewCart);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         cartAdapter = new CartAdapter(this, cartItems);
         recyclerView.setAdapter(cartAdapter);
+        orderSummaryLayout = findViewById(R.id.orderSummaryLayout);
 
         int spacing = getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
         recyclerView.addItemDecoration(new SpaceItemDecoration(spacing));
@@ -141,12 +148,16 @@ public class CartActivity extends AppCompatActivity {
                     }
                 } else {
                     Log.e("CartActivity", "Error: " + response.message());
+                    errorMessage.setVisibility(View.VISIBLE);
+                    orderSummaryLayout.setVisibility(View.GONE);
                     Toast.makeText(CartActivity.this, "Failed to load cart data", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<CartItem>> call, Throwable t) {
+                errorMessage.setVisibility(View.VISIBLE);
+                orderSummaryLayout.setVisibility(View.GONE);
                 Log.e("CartActivity", "Error fetching cart data", t);
                 Toast.makeText(CartActivity.this, "Error fetching cart data", Toast.LENGTH_SHORT).show();
                 showEmptyCartMessage();

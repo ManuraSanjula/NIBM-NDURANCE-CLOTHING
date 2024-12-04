@@ -1,10 +1,15 @@
 package com.ndurance.mobileapp.activity;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,9 +17,11 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -56,6 +63,8 @@ public class UserActivity extends AppCompatActivity {
     private EditText firstName, lastName, email, city, country, street, postalCode, currentPassword, newPassword, confirmPassword;
     private Button btnUpdateProfile, btnUpdateAddress, btnUpdatePassword, btnUploadImage;
     private ImageView ivCart, order_icon;
+    private TextView error_message;
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -111,6 +120,11 @@ public class UserActivity extends AppCompatActivity {
         }
     }
 
+    public boolean isConnectedToInternet() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnected();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,6 +159,7 @@ public class UserActivity extends AppCompatActivity {
         btnUploadImage = findViewById(R.id.btn_upload_image);
         ivCart = findViewById(R.id.ivCart);
         order_icon = findViewById(R.id.order_icon);
+        error_message = findViewById(R.id.error_message);
 
         ivCart.setOnClickListener(v->{
             Intent intent = new Intent(UserActivity.this, CartActivity.class);
@@ -157,6 +172,10 @@ public class UserActivity extends AppCompatActivity {
         });
 
         loadUserData();
+
+        if(!isConnectedToInternet()){
+            error_message.setVisibility(View.VISIBLE);
+        }
 
         btnUploadImage.setOnClickListener(v -> showImagePickerOptions());
 

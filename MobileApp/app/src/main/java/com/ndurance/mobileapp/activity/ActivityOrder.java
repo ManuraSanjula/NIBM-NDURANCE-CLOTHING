@@ -3,7 +3,9 @@ package com.ndurance.mobileapp.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -32,6 +34,7 @@ public class ActivityOrder extends AppCompatActivity {
     private TokenManager tokenManager;
 
     private ImageView cart_icon, profile_icon;
+    private TextView errorMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +42,8 @@ public class ActivityOrder extends AppCompatActivity {
         setContentView(R.layout.activity_order);
 
         tokenManager = new TokenManager(this);
-
+        errorMessage = findViewById(R.id.error_message);
+        errorMessage.setVisibility(View.GONE);
         recyclerView = findViewById(R.id.recyclerView);
 
         cart_icon = findViewById(R.id.cart_icon);
@@ -99,6 +103,7 @@ public class ActivityOrder extends AppCompatActivity {
                     orders.addAll(response.body());
                     adapter.notifyDataSetChanged();
                 } else {
+                    errorMessage.setVisibility(View.VISIBLE);
                     Toast.makeText(ActivityOrder.this, "Failed to fetch orders", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -106,6 +111,7 @@ public class ActivityOrder extends AppCompatActivity {
             @Override
             public void onFailure(Call<List<OrderResponse>> call, Throwable t) {
                 Log.e("ActivityOrder", "Error fetching orders", t);
+                errorMessage.setVisibility(View.VISIBLE);
                 Toast.makeText(ActivityOrder.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

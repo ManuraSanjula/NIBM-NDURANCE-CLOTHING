@@ -31,7 +31,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         View view = LayoutInflater.from(context).inflate(R.layout.product_item, parent, false);
         return new ProductViewHolder(view);
     }
-
+    public void updateData(List<Product> newProductList) {
+        this.productList = newProductList;
+        notifyDataSetChanged();
+    }
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         Product product = productList.get(position);
