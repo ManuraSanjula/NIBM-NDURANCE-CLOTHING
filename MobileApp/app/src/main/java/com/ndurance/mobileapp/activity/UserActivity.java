@@ -1,7 +1,5 @@
 package com.ndurance.mobileapp.activity;
 
-import static androidx.core.content.ContentProviderCompat.requireContext;
-
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
@@ -23,19 +21,14 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-
-import com.bumptech.glide.Glide;
 import com.ndurance.mobileapp.R;
 import com.ndurance.mobileapp.utils.TokenManager;
-import com.squareup.picasso.Picasso;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.File;
@@ -46,7 +39,6 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
@@ -61,7 +53,7 @@ public class UserActivity extends AppCompatActivity {
     private TokenManager tokenManager = new TokenManager(this);
     private ImageView profileImage;
     private EditText firstName, lastName, email, city, country, street, postalCode, currentPassword, newPassword, confirmPassword;
-    private Button btnUpdateProfile, btnUpdateAddress, btnUpdatePassword, btnUploadImage;
+    private Button btnUpdateProfile, btnUpdateAddress, btnUpdatePassword, btnUploadImage, btnLogOut;
     private ImageView ivCart, order_icon;
     private TextView error_message;
 
@@ -131,6 +123,15 @@ public class UserActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
 
+        String userId = tokenManager.getUserId();
+        String jwtToken = tokenManager.getJwtToken();
+
+
+        if(userId == null || jwtToken == null){
+            Intent intent = new Intent(UserActivity.this, MainActivity.class);
+            startActivity(intent);
+        }
+
         checkAndRequestPermissions();
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -154,12 +155,19 @@ public class UserActivity extends AppCompatActivity {
         confirmPassword = findViewById(R.id.et_confirm_password);
 
         btnUpdateProfile = findViewById(R.id.btn_update_account);
+        btnLogOut = findViewById(R.id.btn_log_out);
         btnUpdateAddress = findViewById(R.id.btn_update_address);
         btnUpdatePassword = findViewById(R.id.btn_update_password);
         btnUploadImage = findViewById(R.id.btn_upload_image);
         ivCart = findViewById(R.id.ivCart);
         order_icon = findViewById(R.id.order_icon);
         error_message = findViewById(R.id.error_message);
+
+        btnLogOut.setOnClickListener(v->{
+            tokenManager.clearData();
+            Intent intent = new Intent(UserActivity.this, MainActivity.class);
+            startActivity(intent);
+        });
 
         ivCart.setOnClickListener(v->{
             Intent intent = new Intent(UserActivity.this, CartActivity.class);
@@ -180,7 +188,6 @@ public class UserActivity extends AppCompatActivity {
         btnUploadImage.setOnClickListener(v -> showImagePickerOptions());
 
         btnUpdatePassword.setOnClickListener(v -> {
-            String userId = tokenManager.getUserId();
             String password = currentPassword.getText().toString();
             String newUserPassword = newPassword.getText().toString();
             String confirm_password = confirmPassword.getText().toString();
@@ -188,7 +195,6 @@ public class UserActivity extends AppCompatActivity {
         });
 
         btnUpdateProfile.setOnClickListener(v -> {
-            String userId = tokenManager.getUserId();
             String firstNameField = firstName.getText().toString();
             String lastNameField = lastName.getText().toString();
             String emailField = email.getText().toString();
@@ -196,7 +202,6 @@ public class UserActivity extends AppCompatActivity {
         });
 
         btnUpdateAddress.setOnClickListener(v -> {
-            String userId = tokenManager.getUserId();
             String cityField = city.getText().toString();
             String countryField = country.getText().toString();
             String streetField = street.getText().toString();

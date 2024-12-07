@@ -32,6 +32,7 @@ import com.ndurance.mobileapp.adapter.ProductAdapter;
 import com.ndurance.mobileapp.model.dto.Product;
 import com.ndurance.mobileapp.model.response.ProductResponse;
 import com.ndurance.mobileapp.service.ProductService;
+import com.ndurance.mobileapp.utils.TokenManager;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -44,11 +45,25 @@ public class HomeActivity extends AppCompatActivity {
     private Spinner categorySpinner;
     private List<Product> originalProductList;
     private List<Product> filteredProductList;
+    private TokenManager tokenManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        tokenManager = new TokenManager(this);
+
+        String userId = null;
+        String jwtToken = null;
+
+        userId = tokenManager.getUserId();
+        jwtToken = tokenManager.getJwtToken();
+
+        if(userId == null || jwtToken == null){
+            Intent intent = new Intent(HomeActivity.this, MainActivity.class);
+            startActivity(intent);
+        }
 
         originalProductList = new ArrayList<>();
         filteredProductList = new ArrayList<>();

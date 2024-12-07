@@ -1,7 +1,11 @@
 package com.ndurance.mobileapp.activity;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -49,16 +53,29 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private List<Comment> commentsList = new ArrayList<>();
     private CommentsAdapter commentsAdapter;
     private final OkHttpClient client = new OkHttpClient();
-    private Button btnPrevImage, btnNextImage, btnOrder, btnCart;
+    private Button btnPrevImage, btnNextImage, btnOrder, btnCart, btnUpdate, btnDelete;
     private TokenManager tokenManager = new TokenManager(this);
     private String productId;
     private String product_name;
     private double product_price;
     private List<String> productImages = new ArrayList<>();
+    private SharedPreferences prefs; //--
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_details);
+
+        String userId = tokenManager.getUserId();
+        String jwtToken = tokenManager.getJwtToken();
+
+
+        if(userId == null || jwtToken == null){
+            Intent intent = new Intent(ProductDetailsActivity.this, MainActivity.class);
+            startActivity(intent);
+        }
+
+        prefs = this.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE); //--
 
         // Initialize views
         initializeViews();
@@ -74,7 +91,6 @@ public class ProductDetailsActivity extends AppCompatActivity {
         // Add comment functionality
         btnSubmitComment.setOnClickListener(v -> submitComment(productId));
 
-        String userId = tokenManager.getUserId();
 
         btnCart.setOnClickListener(v -> {
             if (userId == null || userId.isEmpty()) {
@@ -88,7 +104,9 @@ public class ProductDetailsActivity extends AppCompatActivity {
             addToCart(userId);
         });
     }
-
+    public String getRole() {
+        return prefs.getString("ROLE", null); // Corrected key to "ROLE"
+    }
     private void initializeViews() {
         imageSlider = findViewById(R.id.imageSlider);
         productName = findViewById(R.id.productName);
@@ -99,6 +117,19 @@ public class ProductDetailsActivity extends AppCompatActivity {
         btnOrder = findViewById(R.id.btnOrder);
         btnCart = findViewById(R.id.btnCart);
 
+        btnUpdate = findViewById(R.id.btnUpdate);
+        btnDelete = findViewById(R.id.btnDelete);
+
+        if(!getRole().isEmpty() || getRole() != null){
+            if(getRole().equals("ROLE_ADMIN")){
+                btnUpdate.setVisibility(View.VISIBLE);
+                btnDelete.setVisibility(View.VISIBLE);
+
+                btnOrder.setVisibility(View.GONE);
+                btnCart.setVisibility(View.GONE);
+            }
+        }
+
         btnSubmitComment = findViewById(R.id.btnSubmitComment);
         commentInput = findViewById(R.id.commentInput);
         commentsRecyclerView = findViewById(R.id.commentsRecyclerView);
@@ -108,7 +139,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
     }
 
     private void setupCommentsRecyclerView() {
-        commentsAdapter = new CommentsAdapter(commentsList);
+        commentsAdapter = new CommentsAdapter(this, commentsList);
         commentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         commentsRecyclerView.setAdapter(commentsAdapter);
     }

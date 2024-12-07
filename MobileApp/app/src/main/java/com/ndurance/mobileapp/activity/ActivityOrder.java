@@ -32,7 +32,6 @@ public class ActivityOrder extends AppCompatActivity {
     private int page = 1;
     private static final String BASE_URL = "http://10.0.2.2:8080/";
     private TokenManager tokenManager;
-
     private ImageView cart_icon, profile_icon;
     private TextView errorMessage;
 
@@ -42,6 +41,18 @@ public class ActivityOrder extends AppCompatActivity {
         setContentView(R.layout.activity_order);
 
         tokenManager = new TokenManager(this);
+
+        String userId = null;
+        String jwtToken = null;
+
+        userId = tokenManager.getUserId();
+        jwtToken = tokenManager.getJwtToken();
+
+        if(userId == null || jwtToken == null){
+            Intent intent = new Intent(ActivityOrder.this, MainActivity.class);
+            startActivity(intent);
+        }
+
         errorMessage = findViewById(R.id.error_message);
         errorMessage.setVisibility(View.GONE);
         recyclerView = findViewById(R.id.recyclerView);

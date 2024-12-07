@@ -50,6 +50,18 @@ public class OrderDetailedActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order_detailed);
+        tokenManager = new TokenManager(this);
+
+        String userId = null;
+        String jwtToken = null;
+
+        userId = tokenManager.getUserId();
+        jwtToken = tokenManager.getJwtToken();
+
+        if(userId == null || jwtToken == null){
+            Intent intent = new Intent(OrderDetailedActivity.this, MainActivity.class);
+            startActivity(intent);
+        }
 
         tvShippingAddress = findViewById(R.id.tvShippingAddress);
         tvBillingAddress = findViewById(R.id.tvBillingAddress);
@@ -65,7 +77,6 @@ public class OrderDetailedActivity extends AppCompatActivity {
         // Retrieve orderId from Intent
         orderId = getIntent().getStringExtra("orderId");
 
-        tokenManager = new TokenManager(this);
 
         recyclerView = findViewById(R.id.recyclerViewCart);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -83,9 +94,6 @@ public class OrderDetailedActivity extends AppCompatActivity {
         recyclerView.addItemDecoration(new SpaceItemDecoration(spacing));
 
         setupRetrofit();
-
-        String userId = tokenManager.getUserId();
-        String jwtToken = tokenManager.getJwtToken();
 
         if (userId != null && !userId.isEmpty() && jwtToken != null && !jwtToken.isEmpty() && orderId != null) {
             fetchOrderData(userId, jwtToken);

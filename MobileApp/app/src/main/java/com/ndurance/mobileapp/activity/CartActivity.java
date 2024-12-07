@@ -51,6 +51,11 @@ public class CartActivity extends AppCompatActivity {
         String userId = tokenManager.getUserId();
         String jwtToken = tokenManager.getJwtToken();
 
+        if(userId == null || jwtToken == null){
+            Intent intent = new Intent(CartActivity.this, MainActivity.class);
+            startActivity(intent);
+        }
+
         errorMessage = findViewById(R.id.error_message);
         errorMessage.setVisibility(View.GONE);
 

@@ -97,6 +97,13 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         res.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
         res.addHeader(HttpHeaders.SET_COOKIE, userIdCookie.toString());
 
+        userEntity.getRoles().forEach(roleEntity -> {
+            if(roleEntity.getName().equals("ROLE_ADMIN")){
+                res.addHeader("ROLE", "ROLE_ADMIN");
+            }else if (roleEntity.getName().equals("ROLE_USER")){
+                res.addHeader("ROLE", "ROLE_USER");
+            }
+        });
         res.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + encryptToken);
         res.addHeader("UserID", userEntity.getUserId());
 

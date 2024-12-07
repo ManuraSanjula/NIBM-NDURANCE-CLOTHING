@@ -1,6 +1,8 @@
 package com.ndurance.mobileapp.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -34,11 +36,14 @@ public class MainActivity extends AppCompatActivity {
     public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     private OkHttpClient client = new OkHttpClient();
 
-    TokenManager tokenManager = new TokenManager(this);
+    private TokenManager tokenManager = new TokenManager(this);
+    private SharedPreferences prefs; //--
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        prefs = this.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE); //--
 
         String userId = null;
         String jwtToken = null;
@@ -74,6 +79,12 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    public void setRole(String role) {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("ROLE", role);
+        editor.apply();
     }
 
     private void handleSignIn() {
@@ -115,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call call, Response response) throws IOException {
                 String responseBody = response.body().string();
 
+                setRole(response.header("ROLE"));
                 tokenManager.saveTokenAndUserId(response.header("UserID"), response.header("Authorization").split(" ")[1]);;
 
                 runOnUiThread(() -> {

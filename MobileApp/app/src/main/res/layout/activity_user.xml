@@ -224,8 +224,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Update Password"
+            android:padding="12dp"
             android:background="@color/blue"
-            android:textColor="#FFFFFF" />
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="16dp" />
+
+        <Button
+            android:id="@+id/btn_log_out"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Log Out"
+            android:padding="12dp"
+            android:background="@color/red"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="16dp" />
     </LinearLayout>
 
 </ScrollView>
