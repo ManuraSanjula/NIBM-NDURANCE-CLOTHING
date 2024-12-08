@@ -1,6 +1,8 @@
 package com.ndurance.mobileapp.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Bundle;
 import android.text.Editable;
@@ -38,7 +40,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private ProductAdapter adapter;
-    private ImageView carIcon, order_icon;
+    private ImageView carIcon, order_icon, add_icon;
     private ImageView profile_icon;
     private TextView errorMessage;
     private EditText searchField, minPriceField, maxPriceField;
@@ -46,11 +48,18 @@ public class HomeActivity extends AppCompatActivity {
     private List<Product> originalProductList;
     private List<Product> filteredProductList;
     private TokenManager tokenManager;
+    private SharedPreferences prefs; //--
+
+    public String getRole() {
+        return prefs.getString("ROLE", null); // Corrected key to "ROLE"
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        prefs = this.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE); //--
 
         tokenManager = new TokenManager(this);
 
@@ -80,12 +89,24 @@ public class HomeActivity extends AppCompatActivity {
         minPriceField = findViewById(R.id.min_price);
         maxPriceField = findViewById(R.id.max_price);
         categorySpinner = findViewById(R.id.category_spinner);
+        add_icon = findViewById(R.id.add_icon);
+
+        add_icon.setOnClickListener(view -> {
+            Intent intent = new Intent(HomeActivity.this, AddProductActivity.class);
+            startActivity(intent);
+        });
 
         ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_item,
                 new String[]{"All", "HATS", "OUTERWEAR", "FOOTWEAR", "WOMENS", "MENS"});
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categorySpinner.setAdapter(categoryAdapter);
+
+        if(!getRole().isEmpty() || getRole() != null){
+            if(getRole().equals("ROLE_USER")){
+                add_icon.setVisibility(View.GONE);
+            }
+        }
 
         carIcon.setOnClickListener(view -> {
             Intent intent = new Intent(HomeActivity.this, CartActivity.class);
