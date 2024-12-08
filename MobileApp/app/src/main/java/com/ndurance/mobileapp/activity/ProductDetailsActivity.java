@@ -76,19 +76,15 @@ public class ProductDetailsActivity extends AppCompatActivity {
         }
 
         prefs = this.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE); //--
+        productId = getIntent().getStringExtra("productId");
 
-        // Initialize views
-        initializeViews();
+        initializeViews(this, productId);
 
-        // Set up RecyclerView
         setupCommentsRecyclerView();
 
-        // Fetch product and comments
-        productId = getIntent().getStringExtra("productId");
         fetchProductDetails(productId);
         fetchComments(productId);
 
-        // Add comment functionality
         btnSubmitComment.setOnClickListener(v -> submitComment(productId));
 
 
@@ -107,7 +103,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
     public String getRole() {
         return prefs.getString("ROLE", null); // Corrected key to "ROLE"
     }
-    private void initializeViews() {
+    private void initializeViews(Context context, String productId) {
         imageSlider = findViewById(R.id.imageSlider);
         productName = findViewById(R.id.productName);
         productPrice = findViewById(R.id.productPrice);
@@ -127,6 +123,12 @@ public class ProductDetailsActivity extends AppCompatActivity {
 
                 btnOrder.setVisibility(View.GONE);
                 btnCart.setVisibility(View.GONE);
+
+                btnUpdate.setOnClickListener(v->{
+                    Intent intent = new Intent(context, AddProductActivity.class);
+                    intent.putExtra("PRODUCT_ID", productId);
+                    context.startActivity(intent);
+                });
             }
         }
 

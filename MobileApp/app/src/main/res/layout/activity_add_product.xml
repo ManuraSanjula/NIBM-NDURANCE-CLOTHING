@@ -137,7 +137,7 @@
                 android:id="@+id/btnSubmit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Add Product"
+                android:text="Submit"
                 android:background="@color/primarycolor"
                 android:textColor="#FFFFFF"
                 android:padding="12dp"
