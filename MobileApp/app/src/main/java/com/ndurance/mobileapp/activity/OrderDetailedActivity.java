@@ -1,6 +1,8 @@
 package com.ndurance.mobileapp.activity;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -22,9 +24,11 @@ import com.ndurance.mobileapp.model.response.ProductRest;
 import com.ndurance.mobileapp.service.OrderService;
 import com.ndurance.mobileapp.utils.TokenManager;
 
+import java.io.InputStream;
 import java.util.List;
 
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -68,6 +72,7 @@ public class OrderDetailedActivity extends AppCompatActivity {
         layoutExpandable = findViewById(R.id.layoutExpandable);
         tvOrderSummary = findViewById(R.id.tvOrderSummary);
         cart_icon = findViewById(R.id.cart_icon);
+        ivUser = findViewById(R.id.ivUser);
 
         cart_icon.setOnClickListener(view -> {
             Intent intent = new Intent(OrderDetailedActivity.this, CartActivity.class);
@@ -103,6 +108,33 @@ public class OrderDetailedActivity extends AppCompatActivity {
 
         tvOrderSummary.setOnClickListener(view -> toggleExpandableSection());
 
+        fetchUserProfilePicture(userId);
+    }
+
+    private void fetchUserProfilePicture(String userId) {
+        new Thread(() -> {
+            try {
+                String jwtToken = tokenManager.getJwtToken();
+                OkHttpClient client = new OkHttpClient();
+
+                Request request = new Request.Builder()
+                        .url("http://10.0.2.2:8080/user-service/users/image/" + userId)
+                        .addHeader("Authorization", "Bearer " + jwtToken)
+                        .build();
+
+                okhttp3.Response response = client.newCall(request).execute();
+                if (response.isSuccessful()) {
+                    InputStream inputStream = response.body().byteStream();
+                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+                    runOnUiThread(() -> ivUser.setImageBitmap(bitmap));
+                } else {
+                    Log.e("ProfileImage", "Failed to fetch image: " + response.message());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     private void setupRetrofit() {
