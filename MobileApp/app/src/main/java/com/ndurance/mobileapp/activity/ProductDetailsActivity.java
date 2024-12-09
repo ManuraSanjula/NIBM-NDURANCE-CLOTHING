@@ -86,7 +86,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
         fetchComments(productId);
 
         btnSubmitComment.setOnClickListener(v -> submitComment(productId));
-
+        btnDelete = findViewById(R.id.btnDelete);
 
         btnCart.setOnClickListener(v -> {
             if (userId == null || userId.isEmpty()) {
@@ -99,6 +99,85 @@ public class ProductDetailsActivity extends AppCompatActivity {
             }
             addToCart(userId);
         });
+
+        btnDelete.setOnClickListener(v->{
+            deleteProduct(productId);
+        });
+    }
+
+    public void btnOrder(String productId, String userId, double price){
+        String token = tokenManager.getJwtToken();
+
+        if (token == null || token.isEmpty()) {
+            runOnUiThread(() -> Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show());
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                OkHttpClient client = new OkHttpClient();
+
+                JSONObject orderJsonObject = new JSONObject();
+                JSONObject productJsonObject = new JSONObject();
+
+                productJsonObject.put(productId, price);
+
+                orderJsonObject.put("user", userId);
+                orderJsonObject.put("products", productJsonObject);
+
+                RequestBody body = RequestBody.create(orderJsonObject.toString(), MediaType.parse("application/json"));
+
+                Request request = new Request.Builder()
+                        .url("http://10.0.2.2:8080/order-service/orders?addressSame=false&changeAddress=false") // Replace with your base URL localhost:8080/order-service/orders
+                        .post(body)
+                        .addHeader("Authorization", "Bearer " + token)
+                        .build();
+
+                Response response = client.newCall(request).execute();
+
+                if (response.isSuccessful()) {
+                    runOnUiThread(() -> Toast.makeText(this, "Product Ordered successfully", Toast.LENGTH_SHORT).show());
+                } else {
+                    String errorMessage = response.message();
+                    runOnUiThread(() -> Toast.makeText(this, "Failed to Order the product: " + errorMessage, Toast.LENGTH_SHORT).show());
+                }
+            } catch (Exception e) {
+                runOnUiThread(() -> Toast.makeText(this, "Error Order product: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                e.printStackTrace();
+            }
+        }).start();
+    }
+    private void deleteProduct(String productId) {
+        String token = tokenManager.getJwtToken();
+
+        if (token == null || token.isEmpty()) {
+            runOnUiThread(() -> Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show());
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                OkHttpClient client = new OkHttpClient();
+
+                Request request = new Request.Builder()
+                        .url("http://10.0.2.2:8080/product-service/products/" + productId) // Replace with your base URL
+                        .delete()
+                        .addHeader("Authorization", "Bearer " + token)
+                        .build();
+
+                Response response = client.newCall(request).execute();
+
+                if (response.isSuccessful()) {
+                    runOnUiThread(() -> Toast.makeText(this, "Product deleted successfully", Toast.LENGTH_SHORT).show());
+                } else {
+                    String errorMessage = response.message();
+                    runOnUiThread(() -> Toast.makeText(this, "Failed to delete product: " + errorMessage, Toast.LENGTH_SHORT).show());
+                }
+            } catch (Exception e) {
+                runOnUiThread(() -> Toast.makeText(this, "Error deleting product: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                e.printStackTrace();
+            }
+        }).start();
     }
     public String getRole() {
         return prefs.getString("ROLE", null); // Corrected key to "ROLE"
@@ -189,6 +268,10 @@ public class ProductDetailsActivity extends AppCompatActivity {
 
                         ImageSliderAdapter adapter = new ImageSliderAdapter(imageUrls);
                         imageSlider.setAdapter(adapter);
+                    });
+
+                    btnOrder.setOnClickListener(v->{
+                        btnOrder(productId, tokenManager.getUserId(), product_price);
                     });
 
                 } catch (Exception e) {

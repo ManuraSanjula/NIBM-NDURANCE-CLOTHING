@@ -3,6 +3,8 @@ package com.ndurance.mobileapp.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Bundle;
 import android.text.Editable;
@@ -21,12 +23,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import com.ndurance.mobileapp.R;
@@ -123,9 +128,36 @@ public class HomeActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        fetchUserProfilePicture(userId);
         fetchProducts(0, 20);
         setupSearchAndFilterListeners();
 
+    }
+
+    private void fetchUserProfilePicture(String userId) {
+        new Thread(() -> {
+            try {
+                String jwtToken = tokenManager.getJwtToken();
+                OkHttpClient client = new OkHttpClient();
+
+                Request request = new Request.Builder()
+                        .url("http://10.0.2.2:8080/user-service/users/image/" + userId)
+                        .addHeader("Authorization", "Bearer " + jwtToken)
+                        .build();
+
+                okhttp3.Response response = client.newCall(request).execute();
+                if (response.isSuccessful()) {
+                    InputStream inputStream = response.body().byteStream();
+                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+                    runOnUiThread(() -> profile_icon.setImageBitmap(bitmap));
+                } else {
+                    Log.e("ProfileImage", "Failed to fetch image: " + response.message());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     private void setupSearchAndFilterListeners() {

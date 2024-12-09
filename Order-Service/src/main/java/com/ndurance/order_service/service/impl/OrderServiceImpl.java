@@ -47,12 +47,10 @@ public class OrderServiceImpl implements OrderService {
     public void saveOrder(OrderRequestModel orderRequestModel, boolean changeAddress ,boolean addressSame, String token) {
         OrderEntity order = new OrderEntity();
 
-        // Set basic order details
         order.setOrderId(utils.generateAddressId(20));
         order.setOrderDate(new Date());
         order.setUser(orderRequestModel.getUser());
 
-        // Prepare products and calculate total price
         Set<String> productIds = orderRequestModel.getProducts().keySet();
         List<ProductEntity> productEntities = new ArrayList<>();
         AtomicLong totalPrice = new AtomicLong(0);
@@ -62,7 +60,6 @@ public class OrderServiceImpl implements OrderService {
         	
             ProductDTO productRest = productClient.getProductById(productId);
             System.out.println("Product ID: " + productRest.getProductId() + ", Price: " + productRest.getPrice() + ", Quantity: " + 1);
-            // Retrieve the quantity from the request
 
             ProductEntity product = new ProductEntity();
             product.setProductId(productRest.getProductId());
@@ -73,41 +70,51 @@ public class OrderServiceImpl implements OrderService {
             product.setType(productRest.getType());
             product.setQuantity(1);
 
-            // Save product entity and add to the order's product list
             ProductEntity savedProduct = productRepository.save(product);
             productEntities.add(savedProduct);
-
-            // Accumulate total price
             totalPrice.addAndGet(savedProduct.getPrice() * savedProduct.getQuantity());
         });
 
         order.setTotalPrice(totalPrice.get());
-        System.out.print(" ============================== -  ****************** " + totalPrice.get());
         order.setProducts(productEntities);
 
-        // Fetch user details and handle address
         UserRest userRest = userClient.getCustomerById(orderRequestModel.getUser(), token);
 
         if (changeAddress && addressSame) {
-            if (userRest.getAddresses() != null && !userRest.getAddresses().isEmpty()) {
-                AddressesModel model = userRest.getAddresses().get(0);
+            AddressesModel addressesModel =  null;
+            AddressesModel billingAddressModel = userRest.getAddresses().get(0);
+            AddressesModel shippingAddressModel = userRest.getAddresses().get(1);
 
-                AddressEntity address = new AddressEntity();
-                address.setAddressId(utils.generateAddressId(20));
-                address.setCity(model.getCity());
-                address.setCountry(model.getCountry());
-                address.setStreetName(model.getStreetName());
-                address.setPostalCode(model.getPostalCode());
-                address.setOrder(order);
-
-                addressRepository.save(address);
-
-                order.setShippingAddress(address);
-                order.setBillingAddress(address);
-            } else {
-                throw new RuntimeException("No address found for the user.");
+            if(billingAddressModel != null){
+                addressesModel = billingAddressModel;
+            }else if(shippingAddressModel != null){
+                addressesModel = shippingAddressModel;
             }
+
+            AddressEntity billingAddress = new AddressEntity();
+            billingAddress.setAddressId(utils.generateAddressId(20));
+            billingAddress.setCity(addressesModel.getCity());
+            billingAddress.setCountry(addressesModel.getCountry());
+            billingAddress.setStreetName(addressesModel.getStreetName());
+            billingAddress.setPostalCode(addressesModel.getPostalCode());
+            billingAddress.setOrder(order);
+
+            AddressEntity shippingAddress = new AddressEntity();
+            shippingAddress.setAddressId(utils.generateAddressId(20));
+            shippingAddress.setCity(addressesModel.getCity());
+            shippingAddress.setCountry(addressesModel.getCountry());
+            shippingAddress.setStreetName(addressesModel.getStreetName());
+            shippingAddress.setPostalCode(addressesModel.getPostalCode());
+            shippingAddress.setOrder(order);
+
+            AddressEntity biilingAddressEntity = addressRepository.save(billingAddress);
+            AddressEntity shipingAddressEntity = addressRepository.save(shippingAddress);
+
+            order.setShippingAddress(biilingAddressEntity);
+            order.setBillingAddress(shipingAddressEntity);
+
         } else if (changeAddress){
+
             AddressesModel billingAddressModel = userRest.getAddresses().get(0);
             AddressesModel shippingAddressModel = userRest.getAddresses().get(1);
 
@@ -133,6 +140,26 @@ public class OrderServiceImpl implements OrderService {
             order.setShippingAddress(biilingAddressEntity);
             order.setBillingAddress(shipingAddressEntity);
 
+        }else{
+
+            if (userRest.getAddresses() != null && !userRest.getAddresses().isEmpty()) {
+                AddressesModel model = userRest.getAddresses().get(0);
+
+                AddressEntity address = new AddressEntity();
+                address.setAddressId(utils.generateAddressId(20));
+                address.setCity(model.getCity());
+                address.setCountry(model.getCountry());
+                address.setStreetName(model.getStreetName());
+                address.setPostalCode(model.getPostalCode());
+                address.setOrder(order);
+
+                addressRepository.save(address);
+
+                order.setShippingAddress(address);
+                order.setBillingAddress(address);
+            } else {
+                throw new RuntimeException("No address found for the user.");
+            }
         }
         order.setRefund(false);
         order.setDelivered(false);
@@ -212,6 +239,7 @@ public class OrderServiceImpl implements OrderService {
 
         // Update the order with products and total price
         order.setProducts(productEntities);
+        order.setTotalPrice(totalPrice.get());
         orderRepository.save(order);
     }
 }

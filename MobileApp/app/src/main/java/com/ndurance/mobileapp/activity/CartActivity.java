@@ -1,6 +1,8 @@
 package com.ndurance.mobileapp.activity;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -18,11 +20,12 @@ import com.ndurance.mobileapp.adapter.SpaceItemDecoration;
 import com.ndurance.mobileapp.model.dto.CartItem;
 import com.ndurance.mobileapp.service.CartService;
 import com.ndurance.mobileapp.utils.TokenManager;
-
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -32,16 +35,18 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class CartActivity extends AppCompatActivity {
 
-    private TextView tvOriginalPrice, tvSavings, tvStorePickup, tvTax, tvTotal, tvEmptyCartMessage;
-    private Button btnCheckout;
+    private TextView tvTotal, tvEmptyCartMessage;
+    private Button btnCheckout, btnChangeTheAddress;
     private TokenManager tokenManager = new TokenManager(this);
     private CartService cartService;
     private RecyclerView recyclerView;
     private CartAdapter cartAdapter;
     private List<CartItem> cartItems = new ArrayList<>();
     private ImageView ivUser, order_icon;
-    private TextView errorMessage;
+    private TextView errorMessage, tvOrderSummary;
     private LinearLayout orderSummaryLayout;
+    private boolean isExpanded = false;
+    private LinearLayout layoutExpandable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,15 +69,14 @@ public class CartActivity extends AppCompatActivity {
         cartAdapter = new CartAdapter(this, cartItems);
         recyclerView.setAdapter(cartAdapter);
         orderSummaryLayout = findViewById(R.id.orderSummaryLayout);
+        tvOrderSummary = findViewById(R.id.tvOrderSummary);
+        layoutExpandable = findViewById(R.id.layoutExpandable);
+        btnChangeTheAddress = findViewById(R.id.btnChangeTheAddress);
 
         int spacing = getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
         recyclerView.addItemDecoration(new SpaceItemDecoration(spacing));
 
         // Initialize UI components
-        tvOriginalPrice = findViewById(R.id.tvOriginalPrice);
-        tvSavings = findViewById(R.id.tvSavings);
-        tvStorePickup = findViewById(R.id.tvStorePickup);
-        tvTax = findViewById(R.id.tvTax);
         tvTotal = findViewById(R.id.tvTotal);
         tvEmptyCartMessage = findViewById(R.id.tvEmptyCartMessage); // New message view
         btnCheckout = findViewById(R.id.btnCheckout);
@@ -115,16 +119,55 @@ public class CartActivity extends AppCompatActivity {
         if (userId != null && !userId.isEmpty() && jwtToken != null && !jwtToken.isEmpty()) {
             fetchCartData(userId, jwtToken);
         }
+        fetchUserProfilePicture(userId);
+        //tvOrderSummary.setOnClickListener(view -> toggleExpandableSection());
+
+    }
+
+    private void fetchUserProfilePicture(String userId) {
+        new Thread(() -> {
+            try {
+                String jwtToken = tokenManager.getJwtToken();
+                OkHttpClient client = new OkHttpClient();
+
+                Request request = new Request.Builder()
+                        .url("http://10.0.2.2:8080/user-service/users/image/" + userId)
+                        .addHeader("Authorization", "Bearer " + jwtToken)
+                        .build();
+
+                okhttp3.Response response = client.newCall(request).execute();
+                if (response.isSuccessful()) {
+                    InputStream inputStream = response.body().byteStream();
+                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+                    runOnUiThread(() -> ivUser.setImageBitmap(bitmap));
+                } else {
+                    Log.e("ProfileImage", "Failed to fetch image: " + response.message());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    private void toggleExpandableSection() {
+        if (isExpanded) {
+            layoutExpandable.setVisibility(View.GONE);
+            btnCheckout.setVisibility(View.VISIBLE);
+            btnChangeTheAddress.setVisibility(View.GONE);
+            isExpanded = false;
+        } else {
+            layoutExpandable.setVisibility(View.VISIBLE);
+            btnCheckout.setVisibility(View.GONE);
+            btnChangeTheAddress.setVisibility(View.VISIBLE);
+            isExpanded = true;
+        }
     }
 
     private void updateCartUI() {
         if (cartItems.isEmpty()) {
             tvEmptyCartMessage.setVisibility(View.VISIBLE);
             recyclerView.setVisibility(View.GONE);
-            tvOriginalPrice.setText("Original Price: $0");
-            tvSavings.setText("Savings: -$0");
-            tvStorePickup.setText("Store Pickup: $0");
-            tvTax.setText("Tax: $0");
             tvTotal.setText("Total: $0");
         } else {
             tvEmptyCartMessage.setVisibility(View.GONE);
@@ -172,24 +215,10 @@ public class CartActivity extends AppCompatActivity {
 
     private void calculatePrices(List<CartItem> cartItems) {
         int originalPrice = 0;
-        int savings = 0; // Assume a 5% discount
-        int storePickup = 99; // Fixed store pickup fee
-        int tax = 0; // Assume 10% tax
-
         for (CartItem item : cartItems) {
             originalPrice += ( item.getPrice() * item.getQuantity());
         }
-
-        savings = (int) (originalPrice * 0.05); // 5% discount
-        tax = (int) ((originalPrice - savings) * 0.1); // 10% tax
-
-        // Update UI
-        tvOriginalPrice.setText("Original Price: $" + originalPrice);
-        tvSavings.setText("Savings: -$" + savings);
-        tvStorePickup.setText("Store Pickup: $" + storePickup);
-        tvTax.setText("Tax: $" + tax);
-        int total = originalPrice - savings + storePickup + tax;
-        tvTotal.setText("Total: $" + total);
+        tvTotal.setText("Total: $" + originalPrice);
     }
 
     private void checkout() {
@@ -279,10 +308,6 @@ public class CartActivity extends AppCompatActivity {
         recyclerView.setVisibility(View.GONE);
 
         // Reset total and hide order summary
-        tvOriginalPrice.setText("Original Price: $0");
-        tvSavings.setText("Savings: -$0");
-        tvStorePickup.setText("Store Pickup: $0");
-        tvTax.setText("Tax: $0");
         tvTotal.setText("Total: $0");
     }
 

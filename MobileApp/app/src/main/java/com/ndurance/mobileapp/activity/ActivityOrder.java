@@ -1,6 +1,8 @@
 package com.ndurance.mobileapp.activity;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -16,8 +18,11 @@ import com.ndurance.mobileapp.adapter.SpaceItemDecoration;
 import com.ndurance.mobileapp.model.response.OrderResponse;
 import com.ndurance.mobileapp.service.OrderService;
 import com.ndurance.mobileapp.utils.TokenManager;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -25,7 +30,6 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ActivityOrder extends AppCompatActivity {
-
     private RecyclerView recyclerView;
     private OrderAdapter adapter;
     private List<OrderResponse> orders = new ArrayList<>();
@@ -33,7 +37,7 @@ public class ActivityOrder extends AppCompatActivity {
     private static final String BASE_URL = "http://10.0.2.2:8080/";
     private TokenManager tokenManager;
     private ImageView cart_icon, profile_icon;
-    private TextView errorMessage;
+    private TextView errorMessage, tvEmptyOrderMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +63,7 @@ public class ActivityOrder extends AppCompatActivity {
 
         cart_icon = findViewById(R.id.cart_icon);
         profile_icon = findViewById(R.id.profile_icon);
+        tvEmptyOrderMessage = findViewById(R.id.tvEmptyOrderMessage);
 
         cart_icon.setOnClickListener(view -> {
             Intent intent = new Intent(ActivityOrder.this, CartActivity.class);
@@ -83,15 +88,44 @@ public class ActivityOrder extends AppCompatActivity {
         });
 
         recyclerView.setAdapter(adapter);
-
+        fetchUserProfilePicture(userId);
         fetchOrders(page);
 
         findViewById(R.id.nextPageButton).setOnClickListener(v -> {
             page++;
             fetchOrders(page);
         });
+
+        if(orders.isEmpty()){
+            tvEmptyOrderMessage.setVisibility(View.GONE);
+        }
     }
 
+    private void fetchUserProfilePicture(String userId) {
+        new Thread(() -> {
+            try {
+                String jwtToken = tokenManager.getJwtToken();
+                OkHttpClient client = new OkHttpClient();
+
+                Request request = new Request.Builder()
+                        .url("http://10.0.2.2:8080/user-service/users/image/" + userId)
+                        .addHeader("Authorization", "Bearer " + jwtToken)
+                        .build();
+
+                okhttp3.Response response = client.newCall(request).execute();
+                if (response.isSuccessful()) {
+                    InputStream inputStream = response.body().byteStream();
+                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+                    runOnUiThread(() -> profile_icon.setImageBitmap(bitmap));
+                } else {
+                    Log.e("ProfileImage", "Failed to fetch image: " + response.message());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
     private void fetchOrders(int page) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)

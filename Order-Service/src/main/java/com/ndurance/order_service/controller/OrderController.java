@@ -58,22 +58,12 @@ public class OrderController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
-//        System.out.println(username);
-        System.out.println(userId);
-
-//        if(!Objects.equals(username, userId))
-//            throw new OrderServiceException(ErrorMessages.AUTHENTICATION_FAILED.getErrorMessage());
-
         List<OrderRest> orders = orderService.getOrders(userId);
         List<OrderResponse> ordersRes = new ArrayList<>();
 
         orders.forEach(order->{
             OrderResponse orderResponse = new OrderResponse(order.getOrderId(), order.getOrderDate().toString(), order.getPrice());
             ordersRes.add(orderResponse);
-        });
-
-        ordersRes.forEach(order->{
-            System.out.println("FUCK YOU ------------ " + order.getId());
         });
 
         return ordersRes;

@@ -85,4 +85,17 @@ public class CartServiceImpl implements CartService {
 
         orderClient.checkOut(token, userId, orderRequestModel);
     }
+
+    @Override
+    public void increaseAndDecrease(String cartid, boolean in, boolean de) {
+        CartEntity alreadyInCart = cartRepository.findByCartId(cartid);
+        if (in) {
+            int qu = alreadyInCart.getQuantity() + 1;
+            alreadyInCart.setQuantity(qu);
+        } else if (de) {
+            int qu = alreadyInCart.getQuantity() - 1;
+            alreadyInCart.setQuantity(qu);
+        }
+        cartRepository.save(alreadyInCart);
+    }
 }

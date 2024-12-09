@@ -47,7 +47,9 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.ViewHo
         Comment comment = comments.get(position);
         holder.userName.setText(comment.getEmail());
         holder.commentText.setText(comment.getComment());
-        Glide.with(holder.userProfilePic.getContext()).load(comment.getPic()).into(holder.userProfilePic);
+        fetchUserProfilePicture(comment.getUserId(), holder.userProfilePic);
+
+//        Glide.with(holder.userProfilePic.getContext()).load(comment.getPic()).into(holder.userProfilePic);
     }
 
     @Override
@@ -92,7 +94,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.ViewHo
             userName = itemView.findViewById(R.id.userName);
             commentText = itemView.findViewById(R.id.commentText);
             userProfilePic = itemView.findViewById(R.id.userProfilePic);
-            fetchUserProfilePicture(CommentsAdapter.tokenManager.getUserId(), userProfilePic);
         }
     }
 }

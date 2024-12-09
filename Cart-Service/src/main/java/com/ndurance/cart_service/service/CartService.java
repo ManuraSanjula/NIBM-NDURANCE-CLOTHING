@@ -10,4 +10,5 @@ public interface CartService {
     List<CartDTO> getCart(String userId);
     void deleteCart(String id, String userid);
     void checkout(String userId, String token, boolean addressSame);
+    void increaseAndDecrease(String cartid, boolean in, boolean de);
 }

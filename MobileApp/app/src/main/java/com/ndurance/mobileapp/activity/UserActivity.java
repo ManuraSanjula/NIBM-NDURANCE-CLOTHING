@@ -278,14 +278,15 @@ public class UserActivity extends AppCompatActivity {
                             firstName.setText(userData.getString("firstName"));
                             lastName.setText(userData.getString("lastName"));
                             email.setText(userData.getString("email"));
-
-                            JSONObject address = userData.getJSONArray("addresses").getJSONObject(0);
-                            city.setText(address.getString("city"));
-                            country.setText(address.getString("country"));
-                            street.setText(address.getString("streetName"));
-                            postalCode.setText(address.getString("postalCode"));
-
                             fetchUserProfilePicture(userId);
+
+                            if(userData.getJSONArray("addresses") != null){
+                                JSONObject address = userData.getJSONArray("addresses").getJSONObject(0);
+                                city.setText(address.getString("city"));
+                                country.setText(address.getString("country"));
+                                street.setText(address.getString("streetName"));
+                                postalCode.setText(address.getString("postalCode"));
+                            }
 
                         } catch (Exception e) {
                             Toast.makeText(UserActivity.this, "Failed to parse user data", Toast.LENGTH_SHORT).show();

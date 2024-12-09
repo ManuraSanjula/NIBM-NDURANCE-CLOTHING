@@ -20,6 +20,17 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
+    @GetMapping("/qu/{cartid}/{userid}")
+    public void editQuantity(@PathVariable String cartid, @PathVariable String userid, @RequestParam(name = "in") boolean in, @RequestParam(name = "de") boolean de){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String username = authentication.getName();
+        if(!Objects.equals(username, userid))
+            throw new CartServiceException(ErrorMessages.AUTHENTICATION_FAILED.getErrorMessage());
+
+        cartService.increaseAndDecrease(cartid, in, de);
+    }
+
     @GetMapping("/{userid}")
     public List<CartDTO> getCart(@PathVariable String userid){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

@@ -82,42 +82,20 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp"
-        android:visibility="visible"
-        android:background="@drawable/bg_card">
+        android:background="@drawable/bg_card"
+        android:layout_marginTop="8dp">
 
+        <!-- Summary Header (Clickable to Expand) -->
         <TextView
             android:id="@+id/tvOrderSummary"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Order Summary"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="8dp"/>
+<!--            android:drawableEnd="@drawable/ic_expand" -->
 
-        <TextView
-            android:id="@+id/tvOriginalPrice"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Original Price: $7,592.00" />
-
-        <TextView
-            android:id="@+id/tvSavings"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Savings: -$299.00"
-            android:textColor="@color/green" />
-
-        <TextView
-            android:id="@+id/tvStorePickup"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Store Pickup: $99" />
-
-        <TextView
-            android:id="@+id/tvTax"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Tax: $799" />
 
         <TextView
             android:id="@+id/tvTotal"
@@ -126,7 +104,56 @@
             android:text="Total: $8,191.00"
             android:textStyle="bold"
             android:textSize="16sp"
-            android:layout_marginTop="8dp" />
+            android:layout_marginBottom="8dp" />
+
+        <LinearLayout
+            android:id="@+id/layoutExpandable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvShippingAddressLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Shipping Address"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp" />
+
+            <TextView
+                android:id="@+id/tvShippingAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Address here"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tvBillingAddressLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Billing Address"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp" />
+
+            <TextView
+                android:id="@+id/tvBillingAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Address here"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/btnChangeTheAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Change the Address"
+                android:visibility="gone"
+                android:layout_marginTop="16dp" />
+
+        </LinearLayout>
 
         <Button
             android:id="@+id/btnCheckout"
@@ -134,5 +161,6 @@
             android:layout_height="wrap_content"
             android:text="Proceed to Checkout"
             android:layout_marginTop="16dp" />
+
     </LinearLayout>
 </LinearLayout>
