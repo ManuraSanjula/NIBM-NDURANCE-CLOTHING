@@ -56,10 +56,8 @@ public class OrderServiceImpl implements OrderService {
         AtomicLong totalPrice = new AtomicLong(0);
 
         productIds.forEach(productId -> {
-        	System.out.println("Product ID: " + productId);
-        	
+
             ProductDTO productRest = productClient.getProductById(productId);
-            System.out.println("Product ID: " + productRest.getProductId() + ", Price: " + productRest.getPrice() + ", Quantity: " + 1);
 
             ProductEntity product = new ProductEntity();
             product.setProductId(productRest.getProductId());
@@ -81,9 +79,10 @@ public class OrderServiceImpl implements OrderService {
         UserRest userRest = userClient.getCustomerById(orderRequestModel.getUser(), token);
 
         if (changeAddress && addressSame) {
-            AddressesModel addressesModel =  null;
-            AddressesModel billingAddressModel = userRest.getAddresses().get(0);
-            AddressesModel shippingAddressModel = userRest.getAddresses().get(1);
+
+            /*AddressesModel addressesModel =  null;
+            AddressesModel billingAddressModel = orderRequestModel.getBillingAddresses();
+            AddressesModel shippingAddressModel = orderRequestModel.getShippingAddress();
 
             if(billingAddressModel != null){
                 addressesModel = billingAddressModel;
@@ -111,11 +110,11 @@ public class OrderServiceImpl implements OrderService {
             AddressEntity shipingAddressEntity = addressRepository.save(shippingAddress);
 
             order.setShippingAddress(biilingAddressEntity);
-            order.setBillingAddress(shipingAddressEntity);
+            order.setBillingAddress(shipingAddressEntity);*/
 
         } else if (changeAddress){
 
-            AddressesModel billingAddressModel = userRest.getAddresses().get(0);
+            /*AddressesModel billingAddressModel = userRest.getAddresses().get(0);
             AddressesModel shippingAddressModel = userRest.getAddresses().get(1);
 
             AddressEntity billingAddress = new AddressEntity();
@@ -138,7 +137,7 @@ public class OrderServiceImpl implements OrderService {
             AddressEntity shipingAddressEntity = addressRepository.save(shippingAddress);
 
             order.setShippingAddress(biilingAddressEntity);
-            order.setBillingAddress(shipingAddressEntity);
+            order.setBillingAddress(shipingAddressEntity);*/
 
         }else{
 
@@ -160,6 +159,7 @@ public class OrderServiceImpl implements OrderService {
             } else {
                 throw new RuntimeException("No address found for the user.");
             }
+
         }
         order.setRefund(false);
         order.setDelivered(false);

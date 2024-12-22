@@ -56,6 +56,7 @@ public class UserActivity extends AppCompatActivity {
     private Button btnUpdateProfile, btnUpdateAddress, btnUpdatePassword, btnUploadImage, btnLogOut;
     private ImageView ivCart, order_icon;
     private TextView error_message;
+    private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -306,7 +307,7 @@ public class UserActivity extends AppCompatActivity {
                 .setItems(options, (dialog, which) -> {
                     if (which == 0) {
                         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                            openCamera();
+                            openCamera_1();
                         } else {
                             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST);
                         }
@@ -346,6 +347,21 @@ public class UserActivity extends AppCompatActivity {
         }
     }
 
+    // ============================
+    private boolean hasCameraPermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestCameraPermission() {
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST_CODE);
+    }
+
+    private void openCamera_1() {
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
+    }
+    // ============================
+
     private void openGallery() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, GALLERY_REQUEST);
@@ -358,18 +374,23 @@ public class UserActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
 
             if (requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
-                if (photoUri != null) {
+                //if (photoUri != null) {
 
-                    profileImage.setImageURI(photoUri);
-                    File photoFile = new File(photoUri.getPath());
-                    uploadProfilePictureFromFile(photoFile);
+//                    profileImage.setImageURI(photoUri);
+//                    File photoFile = new File(photoUri.getPath());
+//                    uploadProfilePictureFromFile(photoFile);
 
-                    /*Bitmap photo = (Bitmap) data.getExtras().get("data");
-                    profileImage.setImageBitmap(photo);
+//                    Bitmap photo = (Bitmap) data.getExtras().get("data");
+//                    profileImage.setImageBitmap(photo);
+//
+//                    // Upload the image
+//                    uploadProfilePictureFromBitmap(photo);
+                //}
 
-                    // Upload the image
-                    uploadProfilePictureFromBitmap(photo);*/
-                }
+                Bitmap photo = (Bitmap) data.getExtras().get("data");
+                profileImage.setImageBitmap(photo);
+                uploadProfilePictureFromBitmap(photo);
+
             } else if (requestCode == GALLERY_REQUEST && data != null) {
                 Uri selectedImageUri = data.getData();
                 try {
