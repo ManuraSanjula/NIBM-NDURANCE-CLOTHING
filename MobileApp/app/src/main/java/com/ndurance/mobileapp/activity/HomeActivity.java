@@ -1,5 +1,6 @@
 package com.ndurance.mobileapp.activity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,6 +20,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -42,7 +45,8 @@ import com.ndurance.mobileapp.service.ProductService;
 import com.ndurance.mobileapp.utils.TokenManager;
 
 public class HomeActivity extends AppCompatActivity {
-
+    private static final int REQUEST_CODE = 1;
+    private ActivityResultLauncher<Intent> activityResultLauncher;
     private RecyclerView recyclerView;
     private ProductAdapter adapter;
     private ImageView carIcon, order_icon, add_icon;
@@ -123,16 +127,42 @@ public class HomeActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        profile_icon.setOnClickListener(view -> {
-            Intent intent = new Intent(HomeActivity.this, UserActivity.class);
-            startActivity(intent);
-        });
-
         fetchUserProfilePicture(userId);
         fetchProducts(0, 20);
         setupSearchAndFilterListeners();
 
+        activityResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Intent data = result.getData();
+                        if (data != null) {
+                            String returnedData = data.getStringExtra("key");
+                            Toast.makeText(this, "Received: " + returnedData, Toast.LENGTH_SHORT).show();
+                            if(returnedData.equals("true")){
+                                this.recreate();
+                            }
+                        }
+                    }
+                }
+        );
+
+        profile_icon.setOnClickListener(view -> {
+            Intent intent = new Intent(HomeActivity.this, UserActivity.class);
+            //startActivity(intent);
+            activityResultLauncher.launch(intent);
+        });
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            String returnedData = data.getStringExtra("key");
+            Toast.makeText(this, "Received: " + returnedData, Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     private void fetchUserProfilePicture(String userId) {
         new Thread(() -> {

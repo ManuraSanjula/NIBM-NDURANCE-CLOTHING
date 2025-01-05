@@ -1,6 +1,7 @@
 package com.ndurance.mobileapp.activity;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -57,7 +58,7 @@ public class UserActivity extends AppCompatActivity {
     private ImageView ivCart, order_icon;
     private TextView error_message;
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
-
+    private String bool = "false";
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -233,6 +234,14 @@ public class UserActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("key", "true");
+        setResult(Activity.RESULT_OK, resultIntent);
+        super.onBackPressed(); // Ensure the activity finishes
+    }
+
     private void fetchUserProfilePicture(String userId) {
         new Thread(() -> {
             try {
@@ -390,7 +399,6 @@ public class UserActivity extends AppCompatActivity {
                 Bitmap photo = (Bitmap) data.getExtras().get("data");
                 profileImage.setImageBitmap(photo);
                 uploadProfilePictureFromBitmap(photo);
-
             } else if (requestCode == GALLERY_REQUEST && data != null) {
                 Uri selectedImageUri = data.getData();
                 try {
@@ -401,6 +409,7 @@ public class UserActivity extends AppCompatActivity {
                     Toast.makeText(this, "Failed to access the selected image", Toast.LENGTH_SHORT).show();
                 }
             }
+            this.recreate();
         }
     }
     private void uploadProfilePictureFromFile(File file) {
