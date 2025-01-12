@@ -1,5 +1,6 @@
 package com.ndurance.mobileapp.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,16 +15,30 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.ndurance.mobileapp.R;
 import com.ndurance.mobileapp.adapter.CartAdapter;
 import com.ndurance.mobileapp.adapter.SpaceItemDecoration;
 import com.ndurance.mobileapp.model.dto.CartItem;
 import com.ndurance.mobileapp.service.CartService;
 import com.ndurance.mobileapp.utils.TokenManager;
+import com.stripe.android.PaymentConfiguration;
+import com.stripe.android.paymentsheet.PaymentSheet;
+import com.stripe.android.paymentsheet.PaymentSheetResult;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -47,7 +62,11 @@ public class CartActivity extends AppCompatActivity {
     private LinearLayout orderSummaryLayout;
     private boolean isExpanded = false;
     private LinearLayout layoutExpandable;
-
+    private PaymentSheet paymentSheet;
+    private PaymentSheet.CustomerConfiguration customerConfig;
+    private String paymentIntentClientSecret;
+    private int global_tot = 0;
+    private AtomicInteger atomicInteger = new AtomicInteger();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,14 +113,29 @@ public class CartActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        btnCheckout.setOnClickListener(btn->{
+
+       /* paymentSheet = new PaymentSheet(this, this::onPaymentSheetResult);
+        fetchPaymentDetails(this);
+
+        btnCheckout.setOnClickListener(v -> {
+
+            if (paymentIntentClientSecret != null && customerConfig != null) {
+                PaymentSheet.Configuration configuration = new PaymentSheet.Configuration(
+                        "Ndurance Inc.",
+                        customerConfig
+                );
+
+                paymentSheet.presentWithPaymentIntent(paymentIntentClientSecret, configuration);
+            }
+        });*/
+
+       /* btnCheckout.setOnClickListener(btn->{
             checkout();
             cartItems.forEach(cart->{
                 removeFromCart(userId, cart.getCartId());
             });
-        });
+        });*/
 
-        // Initialize Retrofit
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
         OkHttpClient client = new OkHttpClient.Builder()
@@ -115,13 +149,75 @@ public class CartActivity extends AppCompatActivity {
                 .build();
 
         cartService = retrofit.create(CartService.class);
-
         if (userId != null && !userId.isEmpty() && jwtToken != null && !jwtToken.isEmpty()) {
             fetchCartData(userId, jwtToken);
         }
         fetchUserProfilePicture(userId);
+
+        paymentSheet = new PaymentSheet(this, this::onPaymentSheetResult);
+
+        btnCheckout.setOnClickListener(v -> {
+            fetchPaymentDetails(this);
+
+            if (paymentIntentClientSecret != null && customerConfig != null) {
+                PaymentSheet.Configuration configuration = new PaymentSheet.Configuration(
+                        "Ndurance Inc.",
+                        customerConfig
+                );
+
+                paymentSheet.presentWithPaymentIntent(paymentIntentClientSecret, configuration);
+            }
+        });
+
         //tvOrderSummary.setOnClickListener(view -> toggleExpandableSection());
 
+    }
+
+    private void fetchPaymentDetails(Context context) {
+        String url = "http://10.0.2.2:4000/payment-sheet?price="+atomicInteger.toString();
+        StringRequest stringRequest = new StringRequest(
+                com.android.volley.Request.Method.POST,
+                url,
+                response -> {
+                    try {
+                        JSONObject responseJson = new JSONObject(response);
+                        paymentIntentClientSecret = responseJson.getString("paymentIntent");
+                        customerConfig = new PaymentSheet.CustomerConfiguration(
+                                responseJson.getString("customer"),
+                                responseJson.getString("ephemeralKey")
+                        );
+
+                        String publishableKey = responseJson.getString("publishableKey");
+                        PaymentConfiguration.init(context, publishableKey);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.e("PaymentDetails", "Failed to parse JSON: " + e.getMessage());
+                    }
+                },
+                error -> Log.e("PaymentDetails", "Failed to fetch payment details: " + error.getMessage())
+        );
+//        {
+//            @Override
+//            protected Map<String, String> getParams() {
+//                Map<String, String> params = new HashMap<>();
+//                params.put("price", atomicInteger.toString());
+//                return params;
+//            }
+//        };
+
+        Volley.newRequestQueue(context).add(stringRequest);
+    }
+
+    private void onPaymentSheetResult(PaymentSheetResult paymentSheetResult) {
+        if (paymentSheetResult instanceof PaymentSheetResult.Completed) {
+            Log.i("PaymentSheet", "Payment completed successfully.");
+        } else if (paymentSheetResult instanceof PaymentSheetResult.Canceled) {
+            Log.i("PaymentSheet", "Payment was canceled.");
+        } else if (paymentSheetResult instanceof PaymentSheetResult.Failed) {
+            PaymentSheetResult.Failed failedResult = (PaymentSheetResult.Failed) paymentSheetResult;
+            Log.e("PaymentSheet", "Payment failed: " + failedResult.getError().getMessage());
+        }
     }
 
     private void fetchUserProfilePicture(String userId) {
@@ -214,11 +310,11 @@ public class CartActivity extends AppCompatActivity {
     }
 
     private void calculatePrices(List<CartItem> cartItems) {
-        int originalPrice = 0;
         for (CartItem item : cartItems) {
-            originalPrice += ( item.getPrice() * item.getQuantity());
+            global_tot += ( item.getPrice() * item.getQuantity());
         }
-        tvTotal.setText("Total: $" + originalPrice);
+        tvTotal.setText("Total: $" + global_tot);
+        atomicInteger.set(global_tot);
     }
 
     private void checkout() {
@@ -344,5 +440,13 @@ public class CartActivity extends AppCompatActivity {
                 Toast.makeText(CartActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    public int getGlobal_tot() {
+        return global_tot;
+    }
+
+    public void setGlobal_tot(int global_tot) {
+        this.global_tot = global_tot;
     }
 }

@@ -48,6 +48,16 @@ dependencies {
     implementation("com.squareup.picasso:picasso:2.8")
     implementation("androidx.recyclerview:recyclerview:1.3.1")
     implementation("androidx.paging:paging-runtime:3.2.0")
+    implementation ("com.android.volley:volley:1.2.1")
+//    implementation ("com.stripe:stripe-android:20.0.1")
+    implementation("com.stripe:stripe-android:21.3.1")
+
+
+//    implementation ("androidx.constraintlayout:constraintlayout:2.1.4")
+    runtimeOnly("androidx.constraintlayout:constraintlayout:2.2.0")
+
+    implementation ("androidx.appcompat:appcompat:1.6.1")
+    implementation ("com.google.android.material:material:1.9.0")
 
     implementation(libs.material)
     implementation(libs.activity)

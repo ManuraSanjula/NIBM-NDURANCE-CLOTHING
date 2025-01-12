@@ -81,4 +81,14 @@ public class OrderController {
 
        return "String";
     }
+    @GetMapping("/cart/getPrice/{userId}")
+    public Long getPrice(@PathVariable String userId, @RequestBody OrderRequestModelC requestModelC, @RequestHeader(value = "Authorization") String authorizationHeader){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String username = authentication.getName();
+        if(!Objects.equals(username, userId))
+            throw new OrderServiceException(ErrorMessages.AUTHENTICATION_FAILED.getErrorMessage());
+
+        return orderService.getPrice(requestModelC,authorizationHeader, userId);
+    }
 }

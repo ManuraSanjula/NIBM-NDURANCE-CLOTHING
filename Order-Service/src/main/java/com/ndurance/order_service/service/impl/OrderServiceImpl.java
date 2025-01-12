@@ -181,7 +181,65 @@ public class OrderServiceImpl implements OrderService {
         return orderRests;
     }
 
-	@Override
+    @Override
+    public Long getPrice(OrderRequestModelC orderRequestModel, String token, String user) {
+        OrderEntity order = new OrderEntity();
+        order.setOrderId(utils.generateAddressId(20));
+        order.setOrderDate(new Date());
+        order.setUser(user);
+        order.setRefund(false);
+        order.setDelivered(false);
+
+        AtomicLong totalPrice = new AtomicLong(0);
+        List<ProductEntity> productEntities = new ArrayList<>();
+
+        OrderEntity orderEntity = orderRepository.save(order);
+
+        UserRest userRest = userClient.getCustomerById(user, token);
+        AddressEntity address = null;
+
+        if (userRest.getAddresses() != null && !userRest.getAddresses().isEmpty()) {
+            AddressesModel model = userRest.getAddresses().get(0);
+
+            address = new AddressEntity();
+            address.setAddressId(utils.generateAddressId(20));
+            address.setCity(model.getCity());
+            address.setCountry(model.getCountry());
+            address.setStreetName(model.getStreetName());
+            address.setPostalCode(model.getPostalCode());
+            address.setOrder(order);
+
+            addressRepository.save(address);
+
+            order.setShippingAddress(address);
+            order.setBillingAddress(address);
+        } else {
+            throw new RuntimeException("No address found for the user.");
+        }
+
+        // Process cart items
+        orderRequestModel.getCart().forEach(cart -> {
+            ProductDTO productRest = productClient.getProductById(cart.getProductId());
+
+            ProductEntity product = new ProductEntity();
+            product.setProductId(productRest.getProductId());
+            product.setName(productRest.getName());
+            product.setDescription(productRest.getDescription());
+            product.setImages(productRest.getImages());
+            product.setPrice(productRest.getPrice());
+            product.setType(productRest.getType());
+            product.setQuantity(cart.getQuantity());
+            product.setOrder(orderEntity);
+
+            ProductEntity savedProduct = productRepository.save(product);
+            productEntities.add(savedProduct);
+
+            totalPrice.addAndGet((long) savedProduct.getPrice() * savedProduct.getQuantity());
+        });
+        return totalPrice.get();
+    }
+
+    @Override
     public void saveOrder(OrderRequestModelC orderRequestModel, String token, String user) {
         OrderEntity order = new OrderEntity();
         order.setOrderId(utils.generateAddressId(20));

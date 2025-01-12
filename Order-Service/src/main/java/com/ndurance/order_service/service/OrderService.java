@@ -11,5 +11,7 @@ public interface OrderService {
     void saveOrder(OrderRequestModelC orderRequestModel,String token, String user);
     OrderRest getOrder(String publicId);
     List<OrderRest> getOrders(String user);
+    Long getPrice(OrderRequestModelC orderRequestModel,String token, String user);
+
 
 }
