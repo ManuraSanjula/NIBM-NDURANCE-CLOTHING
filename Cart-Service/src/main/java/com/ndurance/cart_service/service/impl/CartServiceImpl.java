@@ -54,6 +54,29 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    public void saveCart(CartRequestModel requestModel, String userId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        CartEntity alreadyInCart = cartRepository.findByProductIdAndUserId(requestModel.getProductId(), userId);
+        if(alreadyInCart != null){
+            alreadyInCart.setQuantity( alreadyInCart.getQuantity() + 1);
+            cartRepository.save(alreadyInCart);
+        }else{
+            CartEntity cartEntity = new CartEntity();
+            cartEntity.setProductId(requestModel.getProductId());
+            cartEntity.setPrice(requestModel.getPrice());
+            cartEntity.setQuantity(requestModel.getQuantity());
+            cartEntity.setName(requestModel.getName());
+            cartEntity.setImages(requestModel.getImages());
+
+            cartEntity.setUser(username);
+            cartEntity.setCartId(utils.generateAddressId(20));
+            cartRepository.save(cartEntity);
+        }
+    }
+
+    @Override
     public List<CartDTO> getCart(String userId) {
         List<CartDTO> wishListDTOS = new ArrayList<>();
         cartRepository.findByUser(userId).forEach(i->{

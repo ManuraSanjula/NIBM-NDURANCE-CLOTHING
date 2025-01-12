@@ -49,7 +49,7 @@ public class CartController {
         String username = authentication.getName();
         if(!Objects.equals(username, userid))
             throw new CartServiceException(ErrorMessages.AUTHENTICATION_FAILED.getErrorMessage());
-        cartService.saveCart(requestModel);
+        cartService.saveCart(requestModel, userid);
     }
 
     @DeleteMapping("/{userid}/{cartid}")
