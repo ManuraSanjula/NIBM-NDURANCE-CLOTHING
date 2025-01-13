@@ -18,6 +18,8 @@ import com.ndurance.mobileapp.adapter.SpaceItemDecoration;
 import com.ndurance.mobileapp.model.response.OrderResponse;
 import com.ndurance.mobileapp.service.OrderService;
 import com.ndurance.mobileapp.utils.TokenManager;
+import com.ndurance.mobileapp.utils.TokenManager2;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +37,7 @@ public class ActivityOrder extends AppCompatActivity {
     private List<OrderResponse> orders = new ArrayList<>();
     private int page = 1;
     private static final String BASE_URL = "http://10.0.2.2:8080/";
-    private TokenManager tokenManager;
+    private TokenManager2 tokenManager;
     private ImageView cart_icon, profile_icon;
     private TextView errorMessage, tvEmptyOrderMessage;
 
@@ -44,7 +46,7 @@ public class ActivityOrder extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order);
 
-        tokenManager = new TokenManager(this);
+        tokenManager = new TokenManager2(this);
 
         String userId = null;
         String jwtToken = null;
@@ -97,7 +99,7 @@ public class ActivityOrder extends AppCompatActivity {
         });
 
         if(orders.isEmpty()){
-            tvEmptyOrderMessage.setVisibility(View.GONE);
+            tvEmptyOrderMessage.setVisibility(View.VISIBLE);
         }
     }
 

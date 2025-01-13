@@ -5,9 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3e3ed449-9ca2-4d9d-ad32-df7d3ec5f200" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/ndurance/cart_service/entity/CartEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ndurance/cart_service/entity/CartEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/ndurance/cart_service/repository/CartRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ndurance/cart_service/repository/CartRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/ndurance/cart_service/service/impl/CartServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ndurance/cart_service/service/impl/CartServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../MobileApp/app/src/main/java/com/ndurance/mobileapp/activity/CartActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../MobileApp/app/src/main/java/com/ndurance/mobileapp/activity/CartActivity.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -75,7 +73,8 @@
       <workItem from="1736675607006" duration="2794000" />
       <workItem from="1736694961750" duration="760000" />
       <workItem from="1736741559735" duration="1171000" />
-      <workItem from="1736747289231" duration="5950000" />
+      <workItem from="1736747289231" duration="6771000" />
+      <workItem from="1736787912242" duration="5738000" />
     </task>
     <servers />
   </component>

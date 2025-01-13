@@ -175,7 +175,9 @@ public class CartActivity extends AppCompatActivity {
                 );
 
                 paymentSheet.presentWithPaymentIntent(paymentIntentClientSecret, configuration);
+
             }
+
         });
 
         //tvOrderSummary.setOnClickListener(view -> toggleExpandableSection());
@@ -219,8 +221,14 @@ public class CartActivity extends AppCompatActivity {
     }
 
     private void onPaymentSheetResult(PaymentSheetResult paymentSheetResult) {
+
         if (paymentSheetResult instanceof PaymentSheetResult.Completed) {
             Log.i("PaymentSheet", "Payment completed successfully.");
+            checkout();
+            cartItems.forEach(cart->{
+                removeFromCart(tokenManager.getUserId(), cart.getCartId());
+            });
+
         } else if (paymentSheetResult instanceof PaymentSheetResult.Canceled) {
             Log.i("PaymentSheet", "Payment was canceled.");
         } else if (paymentSheetResult instanceof PaymentSheetResult.Failed) {
