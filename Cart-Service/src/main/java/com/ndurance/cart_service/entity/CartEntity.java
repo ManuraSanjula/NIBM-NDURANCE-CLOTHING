@@ -19,15 +19,6 @@ public class CartEntity implements Serializable {
     private String cartId;
     private String productId;
     private String name;
-    private String userId;
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
 
     public Long getId() {
         return id;

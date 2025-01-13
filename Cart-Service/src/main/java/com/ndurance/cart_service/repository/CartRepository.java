@@ -11,6 +11,6 @@ public interface CartRepository extends CrudRepository<CartEntity, Long> {
     List<CartEntity> findByUser(String user);
     CartEntity findByCartId(String cartId);
     CartEntity findByProductId(String productId);
-    CartEntity findByProductIdAndUserId(String productId, String userId);
+    CartEntity findByProductIdAndUser(String productId, String user);
 
 }
