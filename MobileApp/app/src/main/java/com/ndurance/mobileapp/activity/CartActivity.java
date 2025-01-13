@@ -50,13 +50,22 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class CartActivity extends AppCompatActivity {
 
-    private TextView tvTotal, tvEmptyCartMessage;
+    public TextView tvTotal, tvEmptyCartMessage;
     private Button btnCheckout, btnChangeTheAddress;
     private TokenManager tokenManager = new TokenManager(this);
     private CartService cartService;
     private RecyclerView recyclerView;
     private CartAdapter cartAdapter;
-    private List<CartItem> cartItems = new ArrayList<>();
+
+    public List<CartItem> getCartItems() {
+        return cartItems;
+    }
+
+    public void setCartItems(List<CartItem> cartItems) {
+        this.cartItems = cartItems;
+    }
+
+    public List<CartItem> cartItems = new ArrayList<>();
     private ImageView ivUser, order_icon;
     private TextView errorMessage, tvOrderSummary;
     private LinearLayout orderSummaryLayout;
@@ -260,7 +269,7 @@ public class CartActivity extends AppCompatActivity {
         }
     }
 
-    private void updateCartUI() {
+    public void updateCartUI() {
         if (cartItems.isEmpty()) {
             tvEmptyCartMessage.setVisibility(View.VISIBLE);
             recyclerView.setVisibility(View.GONE);
@@ -309,7 +318,7 @@ public class CartActivity extends AppCompatActivity {
         });
     }
 
-    private void calculatePrices(List<CartItem> cartItems) {
+    public void calculatePrices(List<CartItem> cartItems) {
         for (CartItem item : cartItems) {
             global_tot += ( item.getPrice() * item.getQuantity());
         }

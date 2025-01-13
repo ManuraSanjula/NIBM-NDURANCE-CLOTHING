@@ -1,12 +1,15 @@
 package com.ndurance.mobileapp.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
@@ -59,13 +62,13 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             }
         });
 
-        holder.btnDecreaseQuantity.setOnClickListener(v-> qu(item, false, true, holder));
-        holder.btnIncreaseQuantity.setOnClickListener(v-> qu(item, true, false, holder));
+        holder.btnDecreaseQuantity.setOnClickListener(v-> qu2(item, false, true, holder));
+        holder.btnIncreaseQuantity.setOnClickListener(v-> qu2(item, true, false, holder));
         holder.tvQuantity.setText(String.valueOf(item.getQuantity()));
     }
 
-    public void qu(CartItem cart, boolean in, boolean de, CartViewHolder holder){
-        String url = "http://10.0.2.2:8080/cart-service/cart/qu/" + cart.getCartId() + "/" + tokenManager.getUserId() + "?in=" + in +"&de=" + de;
+    public void qu2(CartItem cart, boolean in, boolean de, CartViewHolder holder) {
+        String url = "http://10.0.2.2:8080/cart-service/cart/qu/" + cart.getCartId() + "/" + tokenManager.getUserId() + "?in=" + in + "&de=" + de;
 
         Request request = new Request.Builder()
                 .url(url)
@@ -76,35 +79,117 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                ((CartActivity) context).runOnUiThread(() ->
+                        Toast.makeText(context, "Failed to update quantity. Please try again.", Toast.LENGTH_SHORT).show()
+                );
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-
                 if (response.isSuccessful()) {
-                    if(in){
+                    ((CartActivity) context).runOnUiThread(() -> {
+                        try {
+                            // Parse the current quantity and price
+                            int currentQuantity = Integer.parseInt(holder.tvQuantity.getText().toString());
+                            String itemPriceText = holder.tvProductPrice.getText().toString(); // e.g., "$231"
+                            int itemPrice = Integer.parseInt(itemPriceText.replace("$", "").trim());
 
-                        String quantityText = holder.tvQuantity.getText().toString();
-                        int quantity = Integer.parseInt(quantityText);
-                        quantity++;
-                        String updatedQuantityText = String.valueOf(quantity);
-                        holder.tvQuantity.setText(updatedQuantityText);
+                            // Update the quantity logic
+                            int updatedQuantity = currentQuantity;
+                            if (in) updatedQuantity++; // Increment quantity
+                            else if (de && currentQuantity > 1) updatedQuantity--; // Decrement but not below 1
+                            else if (de && currentQuantity == 1) {
+                                // Remove the item if quantity reaches zero
+                                ((CartActivity) context).removeFromCart(cart.getUser(), cart.getCartId());
+                                return;
+                            }
 
-                        int price = ( cart.getPrice() * cart.getQuantity() ) + cart.getPrice();
-                        holder.tvProductPrice.setText("$" + price);
+                            // Update item quantity in the UI
+                            holder.tvQuantity.setText(String.valueOf(updatedQuantity));
 
-                    } else if(de){
+                            // Update the item's price in the UI
+                            int updatedItemPrice = updatedQuantity * cart.getPrice();
+                            holder.tvProductPrice.setText("$" + updatedItemPrice);
 
-                        String quantityText = holder.tvQuantity.getText().toString();
-                        int quantity = Integer.parseInt(quantityText);
-                        quantity--;
-                        String updatedQuantityText = String.valueOf(quantity);
-                        holder.tvQuantity.setText(updatedQuantityText);
+                            // Update the total price dynamically
+                            String totalText = ((CartActivity) context).tvTotal.getText().toString(); // e.g., "Total: $231"
+                            String cleanedTotal = totalText.replace("Total: ", "").replace("$", "").trim();
+                            int currentTotal = Integer.parseInt(cleanedTotal);
 
-                        int price = ( cart.getPrice() * cart.getQuantity() ) - cart.getPrice();
-                        holder.tvProductPrice.setText("$" + price);
+                            // Calculate the new total price
+                            int oldItemPrice = currentQuantity * cart.getPrice();
+                            int priceDifference = updatedItemPrice - oldItemPrice;
+                            int newCartTotal = currentTotal + priceDifference;
 
-                    }
+                            // Update the total cart price in the UI
+                            ((CartActivity) context).tvTotal.setText("Total: $" + newCartTotal);
+
+                        } catch (Exception e) {
+                            Toast.makeText(context, "Error updating cart. Please refresh.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    ((CartActivity) context).runOnUiThread(() ->
+                            Toast.makeText(context, "Failed to update quantity. Server error.", Toast.LENGTH_SHORT).show()
+                    );
+                }
+            }
+        });
+    }
+    public void qu(CartItem cart, boolean in, boolean de, CartViewHolder holder) {
+        String url = "http://10.0.2.2:8080/cart-service/cart/qu/" + cart.getCartId() + "/" + tokenManager.getUserId() + "?in=" + in + "&de=" + de;
+
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Authorization", "Bearer " + tokenManager.getJwtToken())
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                // Handle network failure (optional)
+                ((CartActivity) context).runOnUiThread(() -> {
+                    Toast.makeText(context, "Failed to update quantity. Please try again.", Toast.LENGTH_SHORT).show();
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    ((CartActivity) context).runOnUiThread(() -> {
+                        // Parse the server's response for updated quantity and price (if available)
+                        try {
+                            // Update the quantity in the UI
+                            int currentQuantity = Integer.parseInt(holder.tvQuantity.getText().toString());
+
+                            if (in) {
+                                currentQuantity++;
+                            } else if (de && currentQuantity > 1) {
+                                currentQuantity--;
+                            } else if (de) {
+                                // Remove the item from the cart if quantity reaches 0
+                                ((CartActivity) context).removeFromCart(cart.getUser(), cart.getCartId());
+                                return;
+                            }
+
+                            holder.tvQuantity.setText(String.valueOf(currentQuantity));
+
+                            // Update the price in the UI
+                            int totalPrice = currentQuantity * cart.getPrice();
+                            holder.tvProductPrice.setText("$" + totalPrice);
+
+                        } catch (NumberFormatException e) {
+                            // Handle invalid data from server or UI
+                            Toast.makeText(context, "Error updating quantity. Please refresh the cart.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                } else {
+                    // Handle unsuccessful response
+                    ((CartActivity) context).runOnUiThread(() -> {
+                        Toast.makeText(context, "Failed to update quantity. Server error.", Toast.LENGTH_SHORT).show();
+                    });
                 }
             }
         });
