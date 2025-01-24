@@ -392,4 +392,16 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
+	@Override
+	public boolean userAddress(String userId) {
+		UserEntity userEntity = userRepository.findByUserId(userId);
+		if(userEntity.getAddresses() == null){
+			return false;
+		} else if (userEntity.getAddresses().isEmpty()) {
+			return false;
+		}else{
+			return true;
+		}
+	}
+
 }

@@ -49,6 +49,11 @@ public class UserController {
 		ModelMapper modelMapper = new ModelMapper();
 		return modelMapper.map(userDto, UserRest.class);
 	}
+
+	@GetMapping("/check-address/{userid}")
+	public boolean checkAddress(@PathVariable String userid) {
+		return userService.userAddress(userid);
+	}
 	
 	@PutMapping("/upload-pic/{userid}")
 	public UserRest updateUserProfile(@PathVariable String userid, @RequestParam("image") MultipartFile file) throws Exception {

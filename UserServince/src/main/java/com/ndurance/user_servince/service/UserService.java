@@ -26,4 +26,5 @@ public interface UserService extends UserDetailsService{
 	UserEntity getUserByE(String email);
 	Resource getImage(String userId) throws MalformedURLException;
 	void resetPassWord(UserPasswordReset userPasswordReset);
+	boolean userAddress(String userId);
 }
