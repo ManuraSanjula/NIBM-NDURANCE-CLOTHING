@@ -76,6 +76,7 @@ public class CartActivity extends AppCompatActivity {
     private String paymentIntentClientSecret;
     private int global_tot = 0;
     private AtomicInteger atomicInteger = new AtomicInteger();
+    private boolean isAddressValid = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -164,24 +165,68 @@ public class CartActivity extends AppCompatActivity {
         fetchUserProfilePicture(userId);
 
         paymentSheet = new PaymentSheet(this, this::onPaymentSheetResult);
+        checkAddress();
 
         btnCheckout.setOnClickListener(v -> {
-            fetchPaymentDetails(this);
+            if(isAddressValid)
+            {
+                fetchPaymentDetails(this);
 
-            if (paymentIntentClientSecret != null && customerConfig != null) {
-                PaymentSheet.Configuration configuration = new PaymentSheet.Configuration(
-                        "Ndurance Inc.",
-                        customerConfig
-                );
+                if (paymentIntentClientSecret != null && customerConfig != null) {
+                    PaymentSheet.Configuration configuration = new PaymentSheet.Configuration(
+                            "Ndurance Inc.",
+                            customerConfig
+                    );
 
-                paymentSheet.presentWithPaymentIntent(paymentIntentClientSecret, configuration);
+                    paymentSheet.presentWithPaymentIntent(paymentIntentClientSecret, configuration);
 
+                }
+            }else{
+                runOnUiThread(() -> Toast.makeText(this, "No Address Found", Toast.LENGTH_SHORT).show());
             }
 
         });
 
         //tvOrderSummary.setOnClickListener(view -> toggleExpandableSection());
 
+    }
+
+    private void checkAddress() {
+        new Thread(() -> {
+            try {
+                String jwtToken = tokenManager.getJwtToken();
+                String userId = tokenManager.getUserId();
+
+                OkHttpClient client = new OkHttpClient();
+
+                Request request = new Request.Builder()
+                        .url("http://10.0.2.2:8080/user-service/users/check-address/" + userId)
+                        .addHeader("Authorization", "Bearer " + jwtToken)
+                        .build();
+
+                okhttp3.Response response = client.newCall(request).execute();
+
+                if (response.isSuccessful()) {
+                    String responseData = response.body().string();
+                    isAddressValid = Boolean.parseBoolean(responseData);
+
+//                    runOnUiThread(() -> {
+//                        if (isAddressValid) {
+//                            Toast.makeText(this, "Address is valid!", Toast.LENGTH_SHORT).show();
+//                        } else {
+//                            Toast.makeText(this, "Address is invalid!", Toast.LENGTH_SHORT).show();
+//                        }
+//                    });
+
+                    //runOnUiThread(() -> Toast.makeText(this, "USE Ordered successfully", Toast.LENGTH_SHORT).show());
+                } else {
+                    //String errorMessage = response.message();
+                    //runOnUiThread(() -> Toast.makeText(this, "USE to Order the product: " + errorMessage, Toast.LENGTH_SHORT).show());
+                }
+            } catch (Exception e) {
+                Log.e("ERROR", e.toString());
+            }
+        }).start();
     }
 
     private void fetchPaymentDetails(Context context) {

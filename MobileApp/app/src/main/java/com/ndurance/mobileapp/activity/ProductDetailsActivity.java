@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.ndurance.mobileapp.R;
 import com.ndurance.mobileapp.adapter.CommentsAdapter;
@@ -23,8 +25,12 @@ import com.ndurance.mobileapp.adapter.ImageSliderAdapter;
 import com.ndurance.mobileapp.model.Request.CartRequestModel;
 import com.ndurance.mobileapp.model.dto.Comment;
 import com.ndurance.mobileapp.utils.TokenManager;
+import com.stripe.android.PaymentConfiguration;
+import com.stripe.android.paymentsheet.PaymentSheet;
+import com.stripe.android.paymentsheet.PaymentSheetResult;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -32,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -60,7 +67,12 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private double product_price;
     private List<String> productImages = new ArrayList<>();
     private SharedPreferences prefs; //--
-
+    private PaymentSheet paymentSheet;
+    private PaymentSheet.CustomerConfiguration customerConfig;
+    private String paymentIntentClientSecret;
+    private int global_tot = 0;
+    boolean isAddressValid = false;
+    private AtomicInteger atomicInteger = new AtomicInteger();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,8 +115,70 @@ public class ProductDetailsActivity extends AppCompatActivity {
         btnDelete.setOnClickListener(v->{
             deleteProduct(productId);
         });
+
+        paymentSheet = new PaymentSheet(this, this::onPaymentSheetResult);
+        checkAddress();
+
+        btnOrder.setOnClickListener(v->{
+            if(isAddressValid){
+                fetchPaymentDetails(this);
+
+                if (paymentIntentClientSecret != null && customerConfig != null) {
+                    PaymentSheet.Configuration configuration = new PaymentSheet.Configuration(
+                            "Ndurance Inc.",
+                            customerConfig
+                    );
+
+                    paymentSheet.presentWithPaymentIntent(paymentIntentClientSecret, configuration);
+
+                }
+            }else{
+                runOnUiThread(() -> Toast.makeText(this, "No Address Found", Toast.LENGTH_SHORT).show());
+            }
+            //btnOrder(productId, tokenManager.getUserId(), product_price);
+
+
+        });
+
     }
 
+    private void checkAddress() {
+        new Thread(() -> {
+            try {
+                String jwtToken = tokenManager.getJwtToken();
+                String userId = tokenManager.getUserId();
+
+                OkHttpClient client = new OkHttpClient();
+
+                Request request = new Request.Builder()
+                        .url("http://10.0.2.2:8080/user-service/users/check-address/" + userId)
+                        .addHeader("Authorization", "Bearer " + jwtToken)
+                        .build();
+
+                Response response = client.newCall(request).execute();
+
+                if (response.isSuccessful()) {
+                    String responseData = response.body().string();
+                    isAddressValid = Boolean.parseBoolean(responseData);
+
+//                    runOnUiThread(() -> {
+//                        if (isAddressValid) {
+//                            Toast.makeText(this, "Address is valid!", Toast.LENGTH_SHORT).show();
+//                        } else {
+//                            Toast.makeText(this, "Address is invalid!", Toast.LENGTH_SHORT).show();
+//                        }
+//                    });
+
+                    //runOnUiThread(() -> Toast.makeText(this, "USE Ordered successfully", Toast.LENGTH_SHORT).show());
+                } else {
+                    //String errorMessage = response.message();
+                    //runOnUiThread(() -> Toast.makeText(this, "USE to Order the product: " + errorMessage, Toast.LENGTH_SHORT).show());
+                }
+            } catch (Exception e) {
+                Log.e("ERROR", e.toString());
+            }
+        }).start();
+    }
     public void btnOrder(String productId, String userId, double price){
         String token = tokenManager.getJwtToken();
 
@@ -219,14 +293,63 @@ public class ProductDetailsActivity extends AppCompatActivity {
         btnNextImage.setOnClickListener(v -> navigateImages(1));
     }
 
+    private void fetchPaymentDetails(Context context) {
+        String url = "http://10.0.2.2:4000/payment-sheet?price="+atomicInteger.toString();
+        StringRequest stringRequest = new StringRequest(
+                com.android.volley.Request.Method.POST,
+                url,
+                response -> {
+                    try {
+                        JSONObject responseJson = new JSONObject(response);
+                        paymentIntentClientSecret = responseJson.getString("paymentIntent");
+                        customerConfig = new PaymentSheet.CustomerConfiguration(
+                                responseJson.getString("customer"),
+                                responseJson.getString("ephemeralKey")
+                        );
+
+                        String publishableKey = responseJson.getString("publishableKey");
+                        PaymentConfiguration.init(context, publishableKey);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.e("PaymentDetails", "Failed to parse JSON: " + e.getMessage());
+                    }
+                },
+                error -> Log.e("PaymentDetails", "Failed to fetch payment details: " + error.getMessage())
+        );
+//        {
+//            @Override
+//            protected Map<String, String> getParams() {
+//                Map<String, String> params = new HashMap<>();
+//                params.put("price", atomicInteger.toString());
+//                return params;
+//            }
+//        };
+
+        Volley.newRequestQueue(context).add(stringRequest);
+    }
+
+    private void onPaymentSheetResult(PaymentSheetResult paymentSheetResult) {
+
+        if (paymentSheetResult instanceof PaymentSheetResult.Completed) {
+            Log.i("PaymentSheet", "Payment completed successfully.");
+            btnOrder(productId, tokenManager.getUserId(), product_price);
+        } else if (paymentSheetResult instanceof PaymentSheetResult.Canceled) {
+            Log.i("PaymentSheet", "Payment was canceled.");
+        } else if (paymentSheetResult instanceof PaymentSheetResult.Failed) {
+            PaymentSheetResult.Failed failedResult = (PaymentSheetResult.Failed) paymentSheetResult;
+            Log.e("PaymentSheet", "Payment failed: " + failedResult.getError().getMessage());
+        }
+    }
+
     private void setupCommentsRecyclerView() {
         commentsAdapter = new CommentsAdapter(this, commentsList);
         commentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         commentsRecyclerView.setAdapter(commentsAdapter);
     }
 
-    private void fetchProductDetails(String productId) {
-        String url = "http://10.0.2.2:8080/product-service/products/" + productId;
+    private void fetchProductDetails(String productid) {
+        String url = "http://10.0.2.2:8080/product-service/products/" + productid;
 
         Request request = new Request.Builder().url(url).build();
 
@@ -247,11 +370,13 @@ public class ProductDetailsActivity extends AppCompatActivity {
                     String responseBody = response.body().string();
                     JSONObject productData = new JSONObject(responseBody);
 
+                    productId = productData.getString("productId");
                     product_name = productData.getString("name");
                     product_price = productData.getDouble("price");
 
                     String name = productData.getString("name");
                     double price = productData.getDouble("price");
+                    atomicInteger.set((int)price);
                     String category = productData.getString("type");
 
                     JSONArray images = productData.getJSONArray("images");
@@ -270,9 +395,21 @@ public class ProductDetailsActivity extends AppCompatActivity {
                         imageSlider.setAdapter(adapter);
                     });
 
-                    btnOrder.setOnClickListener(v->{
-                        btnOrder(productId, tokenManager.getUserId(), product_price);
-                    });
+//                    btnOrder.setOnClickListener(v->{
+//                        //btnOrder(productId, tokenManager.getUserId(), product_price);
+//
+//                        fetchPaymentDetails(this);
+//
+//                        if (paymentIntentClientSecret != null && customerConfig != null) {
+//                            PaymentSheet.Configuration configuration = new PaymentSheet.Configuration(
+//                                    "Ndurance Inc.",
+//                                    customerConfig
+//                            );
+//
+//                            paymentSheet.presentWithPaymentIntent(paymentIntentClientSecret, configuration);
+//
+//                        }
+//                    });
 
                 } catch (Exception e) {
                     Log.e(TAG, "Failed to parse product details", e);

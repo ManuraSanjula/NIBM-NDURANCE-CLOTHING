@@ -6,7 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="3e3ed449-9ca2-4d9d-ad32-df7d3ec5f200" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MobileApp/app/src/main/java/com/ndurance/mobileapp/activity/CartActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../MobileApp/app/src/main/java/com/ndurance/mobileapp/activity/CartActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MobileApp/app/src/main/java/com/ndurance/mobileapp/activity/ProductDetailsActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../MobileApp/app/src/main/java/com/ndurance/mobileapp/activity/ProductDetailsActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../UserServince/src/main/java/com/ndurance/user_servince/contoller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../UserServince/src/main/java/com/ndurance/user_servince/contoller/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../UserServince/src/main/java/com/ndurance/user_servince/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../UserServince/src/main/java/com/ndurance/user_servince/service/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../UserServince/src/main/java/com/ndurance/user_servince/service/impl/UserServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../UserServince/src/main/java/com/ndurance/user_servince/service/impl/UserServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,8 +60,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-fdfe4dae3a2d-intellij.indexing.shared.core-IU-243.22562.218" />
-        <option value="bundled-js-predefined-d6986cc7102b-deb605915726-JavaScript-IU-243.22562.218" />
+        <option value="bundled-jdk-9823dce3aa75-125ca727e0f0-intellij.indexing.shared.core-IU-243.23654.117" />
+        <option value="bundled-js-predefined-d6986cc7102b-822845ee3bb5-JavaScript-IU-243.23654.117" />
       </set>
     </attachedChunks>
   </component>
@@ -74,7 +77,11 @@
       <workItem from="1736694961750" duration="760000" />
       <workItem from="1736741559735" duration="1171000" />
       <workItem from="1736747289231" duration="6771000" />
-      <workItem from="1736787912242" duration="5738000" />
+      <workItem from="1736787912242" duration="6150000" />
+      <workItem from="1737618366345" duration="914000" />
+      <workItem from="1737732291135" duration="2955000" />
+      <workItem from="1737736733585" duration="537000" />
+      <workItem from="1737737989756" duration="622000" />
     </task>
     <servers />
   </component>
