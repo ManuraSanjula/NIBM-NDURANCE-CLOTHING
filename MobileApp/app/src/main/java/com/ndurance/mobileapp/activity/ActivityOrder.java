@@ -66,6 +66,7 @@ public class ActivityOrder extends AppCompatActivity {
         cart_icon = findViewById(R.id.cart_icon);
         profile_icon = findViewById(R.id.profile_icon);
         tvEmptyOrderMessage = findViewById(R.id.tvEmptyOrderMessage);
+        tvEmptyOrderMessage.setVisibility(View.GONE);
 
         cart_icon.setOnClickListener(view -> {
             Intent intent = new Intent(ActivityOrder.this, CartActivity.class);
@@ -97,10 +98,6 @@ public class ActivityOrder extends AppCompatActivity {
             page++;
             fetchOrders(page);
         });
-
-        if(orders.isEmpty()){
-            tvEmptyOrderMessage.setVisibility(View.VISIBLE);
-        }
     }
 
     private void fetchUserProfilePicture(String userId) {
@@ -149,6 +146,12 @@ public class ActivityOrder extends AppCompatActivity {
 
                     orders.addAll(response.body());
                     adapter.notifyDataSetChanged();
+                    Log.e("---------------------" , String.valueOf(orders.size()));
+
+                    if(orders.isEmpty()){
+                        tvEmptyOrderMessage.setVisibility(View.VISIBLE);
+                    }
+
                 } else {
                     errorMessage.setVisibility(View.VISIBLE);
                     Toast.makeText(ActivityOrder.this, "Failed to fetch orders", Toast.LENGTH_SHORT).show();

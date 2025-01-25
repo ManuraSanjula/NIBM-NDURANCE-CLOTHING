@@ -168,6 +168,8 @@ public class CartActivity extends AppCompatActivity {
         checkAddress();
 
         btnCheckout.setOnClickListener(v -> {
+            Log.e("ERROR ---------------------- isAddressValid ", String.valueOf(isAddressValid));
+
             if(isAddressValid)
             {
                 fetchPaymentDetails(this);
@@ -208,8 +210,8 @@ public class CartActivity extends AppCompatActivity {
 
                 if (response.isSuccessful()) {
                     String responseData = response.body().string();
+                    Log.e("ERROR ---------------------- ", responseData);
                     isAddressValid = Boolean.parseBoolean(responseData);
-
 //                    runOnUiThread(() -> {
 //                        if (isAddressValid) {
 //                            Toast.makeText(this, "Address is valid!", Toast.LENGTH_SHORT).show();
