@@ -1,34 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
+    android:padding="24dp"
     android:background="#FFFFFF">
 
     <!-- App Title -->
     <TextView
-        android:id="@+id/tvTitle"
+        android:id="@+id/tvAppTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="NDURANCE"
+        android:textSize="24sp"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Separator Line -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="#6200EE"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Login Text -->
+    <TextView
+        android:id="@+id/tvLogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Login"
-        android:textSize="24sp"
+        android:textSize="20sp"
         android:textColor="#000000"
-        android:fontFamily="sans-serif-medium" />
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
 
-    <!-- Username Field -->
+    <!-- Email Field -->
     <EditText
         android:id="@+id/etUsername"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Username"
-        android:padding="8dp"
+        android:hint="Email"
+        android:padding="12dp"
         android:background="@android:drawable/edit_text"
         android:textColorHint="#888888"
         android:textColor="#000000"
-        android:layout_marginTop="16dp" />
+        android:layout_marginBottom="12dp" />
 
     <!-- Password Field -->
     <EditText
@@ -36,34 +55,34 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Password"
-        android:padding="8dp"
+        android:padding="12dp"
         android:background="@android:drawable/edit_text"
         android:inputType="textPassword"
         android:textColorHint="#888888"
         android:textColor="#000000"
-        android:layout_marginTop="8dp" />
+        android:layout_marginBottom="16dp" />
 
     <!-- Login Button -->
     <Button
         android:id="@+id/btnLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
         android:text="Login"
         android:textColor="#FFFFFF"
         android:background="#6200EE"
+        android:textSize="16sp"
         android:fontFamily="sans-serif-medium"
-        android:layout_marginTop="16dp" />
+        android:layout_marginBottom="12dp" />
 
-    <!-- Create New Account Link -->
+    <!-- Register Link -->
     <TextView
         android:id="@+id/tvCreateAccount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Create New Account"
+        android:text="Register"
         android:textSize="14sp"
         android:textColor="#6200EE"
-        android:layout_marginTop="16dp"
+        android:textStyle="bold"
         android:clickable="true"
         android:focusable="true" />
 </LinearLayout>

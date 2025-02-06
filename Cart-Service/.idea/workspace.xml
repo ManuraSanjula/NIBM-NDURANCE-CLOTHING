@@ -15,6 +15,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;ManuraSanjula&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/ManuraSanjula/NIBM-NDURANCE-CLOTHING.git&quot;,
+    &quot;accountId&quot;: &quot;527cab73-74ba-43b2-901f-5a2494e6205b&quot;
+  }
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
 }</component>
@@ -56,8 +68,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-125ca727e0f0-intellij.indexing.shared.core-IU-243.23654.117" />
-        <option value="bundled-js-predefined-d6986cc7102b-822845ee3bb5-JavaScript-IU-243.23654.117" />
+        <option value="bundled-jdk-9823dce3aa75-125ca727e0f0-intellij.indexing.shared.core-IU-243.23654.189" />
+        <option value="bundled-js-predefined-d6986cc7102b-822845ee3bb5-JavaScript-IU-243.23654.189" />
       </set>
     </attachedChunks>
   </component>
@@ -78,6 +90,8 @@
       <workItem from="1737732291135" duration="2955000" />
       <workItem from="1737736733585" duration="537000" />
       <workItem from="1737737989756" duration="630000" />
+      <workItem from="1737817234368" duration="640000" />
+      <workItem from="1738807143836" duration="830000" />
     </task>
     <servers />
   </component>

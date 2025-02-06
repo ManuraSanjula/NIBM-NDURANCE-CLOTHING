@@ -5,17 +5,38 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
+    android:padding="24dp"
     android:background="#FFFFFF">
 
-    <!-- App Title -->
+    <!-- App Title with underline -->
+    <TextView
+        android:id="@+id/tvAppTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="NDURANCE"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:fontFamily="sans-serif"
+        android:paddingBottom="8dp" />
+
+    <View
+        android:layout_width="80dp"
+        android:layout_height="2dp"
+        android:background="#6200EE"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Create New Account Title -->
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Create New Account"
-        android:textSize="24sp"
+        android:textSize="18sp"
+        android:textStyle="bold"
         android:textColor="#000000"
-        android:fontFamily="sans-serif-medium" />
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginBottom="16dp" />
 
     <!-- First Name Field -->
     <EditText
@@ -23,11 +44,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="First Name"
-        android:padding="8dp"
+        android:padding="12dp"
         android:background="@android:drawable/edit_text"
         android:textColorHint="#888888"
         android:textColor="#000000"
-        android:layout_marginTop="16dp" />
+        android:layout_marginBottom="8dp" />
 
     <!-- Last Name Field -->
     <EditText
@@ -35,11 +56,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Last Name"
-        android:padding="8dp"
+        android:padding="12dp"
         android:background="@android:drawable/edit_text"
         android:textColorHint="#888888"
         android:textColor="#000000"
-        android:layout_marginTop="8dp" />
+        android:layout_marginBottom="8dp" />
 
     <!-- Email Field -->
     <EditText
@@ -47,11 +68,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Email"
-        android:padding="8dp"
+        android:padding="12dp"
         android:background="@android:drawable/edit_text"
         android:textColorHint="#888888"
         android:textColor="#000000"
-        android:layout_marginTop="8dp" />
+        android:layout_marginBottom="8dp" />
 
     <!-- Password Field -->
     <EditText
@@ -59,33 +80,36 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Password"
-        android:padding="8dp"
+        android:padding="12dp"
         android:background="@android:drawable/edit_text"
         android:inputType="textPassword"
         android:textColorHint="#888888"
         android:textColor="#000000"
-        android:layout_marginTop="8dp" />
+        android:layout_marginBottom="16dp" />
 
     <!-- Register Button -->
     <Button
         android:id="@+id/btnRegister"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
+        android:padding="12dp"
         android:text="Register"
         android:textColor="#FFFFFF"
-        android:background="#6200EE"
+        android:backgroundTint="#6200EE"
+        android:textSize="16sp"
         android:fontFamily="sans-serif-medium"
-        android:layout_marginTop="16dp" />
+        android:layout_marginBottom="16dp" />
 
+    <!-- Login Text -->
     <TextView
         android:id="@+id/tvLogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Login"
         android:textSize="14sp"
+        android:textStyle="bold"
         android:textColor="#6200EE"
-        android:layout_marginTop="16dp"
         android:clickable="true"
-        android:focusable="true" />
+        android:focusable="true"
+        android:layout_marginTop="4dp" />
 </LinearLayout>
